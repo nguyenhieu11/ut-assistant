@@ -2,7 +2,7 @@ import express from 'express';
 import Parser from 'tree-sitter';
 import C from 'tree-sitter-c';
 import { traverse, traverseTypeOfLine } from './traverse.js';
-import { cFunc } from './c-function.js';
+// import { cFunc } from './c-function.js';
 import {
     getFuncIdentifier,
     getFuncReturnType,
@@ -20,10 +20,21 @@ import {
     preorderTraversal,
     findIfCondition,
     getIfInfo,
-    findBinaryExpression
+    findBinaryExpression,
+    findIdentifier
 } from './preorder-traversal.js'
 
+import { parseDecision } from './decision/parse-decision.js'
 
+import fs from 'fs'
+
+// import {
+//     getTrustTable
+// } from './mcdc/trust-table.js'
+
+// import {
+//     getMcdc
+// } from './mcdc/mcdc.js'
 
 // Initialize the parser
 const parser = new Parser();
@@ -36,8 +47,10 @@ const app = express();
 // Define a route for the API endpoint
 app.get('/get-ast', (req, res) => {
 
+    let c_func_str = fs.readFileSync('../source-structure/example_01/example_01.c', 'utf8');
+
     // Parse the C code
-    const tree = parser.parse(cFunc);
+    const tree = parser.parse(c_func_str);
 
     markNumOfTree(tree.rootNode, 1);
     levelOrder(tree.rootNode);
@@ -47,6 +60,7 @@ app.get('/get-ast', (req, res) => {
     let preorder = preorderTraversal(rootNode);
 
     // // preorderTraversal(node.children[0].children[1].children[1]);
+    /** */
     let if_list = findIfCondition(rootNode);
     // console.log(if_list[0])
     let if_list_info = []
@@ -68,6 +82,7 @@ app.get('/get-ast', (req, res) => {
                     }
                 })
 
+                /** Only push the condition not existed */
                 if (be.mark >= e.mark && be.mark < min_child_mark) {
                     let existed_be = false;
                     valid_binary_expression_list.forEach(vbe => {
@@ -84,26 +99,54 @@ app.get('/get-ast', (req, res) => {
                 valid_binary_expression_list = binary_expression_list
             }
         })
+
+        let identifier_list = findIdentifier(e.node)
+
+        /** Delete .node inside info */
+        // delete info.node;
+
         if_list_info.push({
             par_mark: e.node.par_mark,
             mark: e.node.mark,
             info,
             child_if_list_mark,
             // binary_expression_list,
-            valid_binary_expression_list
+            valid_binary_expression_list,
+            identifier_list,
         })
     })
 
+    const decision_list = parseDecision(if_list_info);
     res.send({
+        // if_list_info,
+        decision_list,
         // preorder,
-        if_list_info
         // binary_expression_list
         // func_return_type,
         // func_name,
         // func_param_list,
-        // func_local_var_list
+        // func_local_var_list,
+        // c_func
     })
 });
+
+// app.get('/get-trust-table', (req, res) => {
+//     let trust_table = getTrustTable();
+
+//     res.send({
+//         trust_table
+//     })
+// });
+
+
+// app.get('/get-mcdc', (req, res) => {
+//     let trust_table = getTrustTable();
+//     let mcdc = getMcdc(trust_table);
+
+//     res.send({
+//         mcdc
+//     })
+// });
 
 // Start the server on port 3000
 const port = 3000;

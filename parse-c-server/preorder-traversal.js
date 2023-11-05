@@ -118,7 +118,9 @@ export function getIfInfo(node) {
                 if (node.children[i].type === 'parenthesized_expression') {
                     return {
                         condition: node.children[i].text,
-                        line: node.children[i].startPosition.row
+                        startPosition: node.children[i].startPosition,
+                        endPosition: node.children[i].endPosition,
+                        node: node.children[i]
                     }
                 }
             }
@@ -170,12 +172,28 @@ export function findBinaryExpression(root) {
                         //     node,
                         //     mark: node.mark
                         // })
-                        binary_expression_list.push({
-                            // node,
-                            // par_mark: par.mark,
-                            mark: node.mark,
-                            binary_expression: node.text
-                        })
+                        /** only push the lowest level binary_expression to array */
+                        let isLowestLevel = true;
+                        for (let iCheckLowestLevel = 0; iCheckLowestLevel < node.children.length; iCheckLowestLevel++) {
+                            if (node.children[iCheckLowestLevel].children.length) {
+                                console.log('this binary_expression is not lowest level')
+                                console.log(node.text);
+                                isLowestLevel = false;
+                            }
+
+                        }
+                        if (isLowestLevel) {
+                            binary_expression_list.push({
+                                // node,
+                                // par_mark: par.mark,
+                                mark: node.mark,
+                                startPosition: node.startPosition,
+                                endPosition: node.endPosition,
+                                binary_expression: node.text,
+                                node
+                            })
+                        }
+
                     }
                     break;
                 }
@@ -192,4 +210,73 @@ export function findBinaryExpression(root) {
     // console.log('binary_expression_list')
     // console.log(binary_expression_list);
     return binary_expression_list;
+}
+
+export function findIdentifier(root) {
+    console.log("findIdentifier");
+    console.log("root.children.length: ", root.children.length)
+    let stack = [];
+    // 'Preorder'-> contains all the
+    // visited nodes.
+    let identifier_list = [];
+    let preorder = [];
+    preorder.push(root.mark);
+    stack.push(root);
+
+
+    while (stack.length > 0) {
+        // 'flag' checks whether all the child
+        // nodes have been visited.
+        let flag = 0;
+        // CASE 1- If Top of the stack is a leaf
+        // node then remove it from the stack:
+        if (stack[stack.length - 1].children.length === 0) {
+            let x = stack.pop();
+            // CASE 2- If Top of the stack is
+            // Parent with children:
+        } else {
+            let par = stack[stack.length - 1];
+            // a)As soon as an unvisited child is
+            // found(left to right sequence),
+            // Push it to Stack and Store it in
+            // Auxiliary List(Marked Visited)
+            // Start Again from Case-1, to explore
+            // this newly visited child
+            for (let i = 0; i < par.children.length; i++) {
+                if (!preorder.includes(par.children[i].mark)) {
+                    flag = 1;
+                    stack.push(par.children[i]);
+                    preorder.push(par.children[i].mark);
+
+                    let node = par.children[i];
+                    if (node.type == 'identifier') {
+                        // identifier_list.push({
+                        //     node,
+                        //     mark: node.mark
+                        // })
+                        identifier_list.push({
+                            // node,
+                            // par_mark: par.mark,
+                            mark: node.mark,
+                            startPosition: node.startPosition,
+                            endPosition: node.endPosition,
+                            identifier: node.text,
+                            node
+                        })
+                    }
+                    break;
+                }
+                // b)If all Child nodes from left to right
+                // of a Parent have been visited
+                // then remove the parent from the stack.
+            }
+            if (flag === 0) {
+                stack.pop();
+            }
+        }
+    }
+    console.log(preorder);
+    // console.log('identifier_list')
+    // console.log(identifier_list);
+    return identifier_list;
 }
