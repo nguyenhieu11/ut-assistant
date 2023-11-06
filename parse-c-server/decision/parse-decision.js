@@ -70,6 +70,7 @@ function getMcdcTable(condition) {
     for (let i_rp = 0; i_rp < replace_list.length; i_rp++) {
         /** start from 'A' (65) */
         let rp_to = String.fromCharCode(i_rp + 65);
+        replace_list[i_rp].character = rp_to;
         let rp_from = ''
         if (replace_list[i_rp].binary_expression) {
             rp_from = replace_list[i_rp].binary_expression
@@ -80,10 +81,10 @@ function getMcdcTable(condition) {
         for (let i_space = 0; i_space < (length_of_rp - 1); i_space++) {
             rp_to += ' '
         }
+        /** text.replace only replace the first found text */
         condition_text = condition_text.replace(rp_from, rp_to)
-
     }
-
+    condition_text = condition_text.replaceAll(' ', '');
 
     let truth_table = []
     /** [var_1, var_2, ...., var_n, result] */
@@ -104,12 +105,24 @@ function getMcdcTable(condition) {
              * i_var = 1 --> var_2 = 0
              */
             truth_table[i_row][`var_${i_var + 1}`] = (i_row & (1 << (number_var - 1 - i_var))) ? 1 : 0;
-
-
         }
-
     }
-    return { condition_text, info, number_var, replace_list }
+
+    truth_table.forEach(t => {
+        let test_str = ''
+        for (let i_rp = 0; i_rp < replace_list.length; i_rp++) {
+            test_str += `let ${replace_list[i_rp].character} = ` + t[`var_${i_rp + 1}`] + '; '
+        }
+        test_str += condition_text;
+        console.log(test_str);
+        console.log(eval(test_str))
+        t.result = eval(test_str);
+
+        // let result = test_str
+    })
+
+    // let result = 1
+    return { condition_text, info, number_var, replace_list, truth_table }
     return condition_text;
 }
 
