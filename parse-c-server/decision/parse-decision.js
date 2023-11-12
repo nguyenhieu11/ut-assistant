@@ -1,6 +1,7 @@
 
 
-export function parseDecision(if_list_info) {
+
+export function getTestCaseList(if_list_info) {
     let all_test_case = []
     if_list_info.forEach(ili => {
         let ts_each_condition = parseTestCase(ili)
@@ -63,10 +64,74 @@ function parseTestCase(condition_info) {
     return mcdc_table
 }
 
+function getAssignValue(identifier, operator, var_value, condition_value) {
+    let assign = {}
+
+    // console.log({ identifier, operator, var_value, condition_value })
+
+    assign.identifier = identifier;
+    switch (operator) {
+        case '>':
+            if (condition_value == 1) {
+                assign.value = parseInt(var_value) + 1;
+            }
+            else {
+
+                assign.value = parseInt(var_value);
+            }
+            break;
+        case '<':
+            if (condition_value == 1) {
+                assign.value = parseInt(var_value) - 1;
+            }
+            else {
+
+                assign.value = parseInt(var_value);
+            }
+            break;
+        case '==':
+            if (condition_value == 1) {
+                assign.value = parseInt(var_value);
+            }
+            else {
+                assign.value = parseInt(var_value) + 1;
+            }
+            break;
+
+        default:
+            break;
+    }
+    return assign;
+}
+
+function getAssignFromBinaryExpression(binary_expression_node, condition_value) {
+    const node = binary_expression_node;
+    if (node.children.length == 3) {
+        const left = node.children[0];
+        const operator = node.children[1];
+        const right = node.children[2];
+        let assign_value = {}
+        if (left.type == 'identifier' && right.type == 'number_literal') {
+            assign_value = getAssignValue(left.text, operator.text, right.text, condition_value);
+        }
+        else if (left.type == 'number_literal' && right.type == 'identifier') {
+            assign_value = getAssignValue(right.text, operator.text, left.text, condition_value);
+        }
+        return assign_value
+    }
+    else {
+        console.log(`binary_expression_node.childred.length: ${binary_expression_node.children.length}`)
+    }
+
+    return {}
+}
+
 function getMcdcTable(condition) {
     let { info, number_var, replace_list } = condition;
-    let condition_text = info.condition
+    const condition_text = info.condition
 
+    let shorten_condition = condition_text;
+    // let shorten_condition_text =
     for (let i_rp = 0; i_rp < replace_list.length; i_rp++) {
         /** start from 'A' (65) */
         let rp_to = String.fromCharCode(i_rp + 65);
@@ -82,9 +147,9 @@ function getMcdcTable(condition) {
             rp_to += ' '
         }
         /** text.replace only replace the first found text */
-        condition_text = condition_text.replace(rp_from, rp_to)
+        shorten_condition = shorten_condition.replace(rp_from, rp_to)
     }
-    condition_text = condition_text.replaceAll(' ', '');
+    shorten_condition = shorten_condition.replaceAll(' ', '');
 
     let truth_table = []
     /** [var_1, var_2, ...., var_n, result] */
@@ -104,16 +169,18 @@ function getMcdcTable(condition) {
              * i_var = 0 --> var_1 = 1
              * i_var = 1 --> var_2 = 0
              */
-            truth_table[i_row][`var_${i_var + 1}`] = (i_row & (1 << (number_var - 1 - i_var))) ? 1 : 0;
+            /** 65: character 'A' */
+            truth_table[i_row][`var_${String.fromCharCode(65 + i_var)}`] = (i_row & (1 << (number_var - 1 - i_var))) ? 1 : 0;
         }
     }
 
     truth_table.forEach(t => {
         let test_str = ''
         for (let i_rp = 0; i_rp < replace_list.length; i_rp++) {
-            test_str += `let ${replace_list[i_rp].character} = ` + t[`var_${i_rp + 1}`] + '; '
+            /** 65: character 'A' */
+            test_str += `let ${replace_list[i_rp].character} = ` + t[`var_${String.fromCharCode(65 + i_rp)}`] + '; '
         }
-        test_str += condition_text;
+        test_str += shorten_condition;
         console.log(test_str);
         console.log(eval(test_str))
         t.result = eval(test_str);
@@ -121,8 +188,75 @@ function getMcdcTable(condition) {
         // let result = test_str
     })
 
+    /** Create test case form truth table */
+    let test_case_list = []
+    truth_table.forEach(t => {
+        let test_case = {}
+        test_case.ts_number = t['TC']
+        // test_case.description = `Check coverage ${t.result ? 'TRUE' : 'FALSE'} case of condition: ${info.condition}`
+
+        /** Assign value for variables */
+        /** 1. Get list of replace character */
+        let obj_key = Object.keys(t);
+        // test_case.obj_key = obj_key
+        let character_list = []
+        obj_key.forEach(obk => {
+            if (obk.includes('var_')) {
+                let character = obk.replace('var_', '');
+                character_list.push(character);
+            }
+        })
+        // test_case.character_list = character_list
+
+        let rp_condition_list = []
+        character_list.forEach(chr => {
+            let rp_condition = {}
+            replace_list.forEach(rp => {
+                if (rp.character == chr) {
+                    rp_condition = rp
+                }
+            })
+            rp_condition.value = t[`var_${chr}`]
+            rp_condition_list.push(rp_condition)
+        })
+        // test_case.rp_condition_list = rp_condition_list
+
+        /** Get assign_list form rp_condition_list */
+        let assign_list = []
+        rp_condition_list.forEach(cond => {
+            let assign = {}
+            if (Object.keys(cond).includes('binary_expression')) {
+                assign = getAssignFromBinaryExpression(cond.node, cond.value);
+            } else if (Object.keys(cond).includes('identifier')) {
+                assign.identifier = cond.identifier
+                assign.value = cond.value
+            }
+            /** Get character and condition result for generate description step */
+            assign.character = cond.character
+            assign.conditon_value = cond.value
+            assign_list.push(assign)
+        })
+        test_case.assign_list = assign_list
+        /** Push test case to array */
+        test_case_list.push(test_case)
+
+        /** Generate test case description*/
+        test_case_list.forEach(ts => {
+            let case_in_text = shorten_condition
+            ts.assign_list.forEach(as => {
+                if (as.conditon_value == 1) {
+                    case_in_text = case_in_text.replace(as.character, ' T ')
+                } else {
+                    case_in_text = case_in_text.replace(as.character, ' F ')
+                }
+            })
+            ts.case_in_text = case_in_text
+            ts.condition = condition_text
+        })
+
+    })
     // let result = 1
-    return { condition_text, info, number_var, replace_list, truth_table }
-    return condition_text;
+    return test_case_list
+    // return { test_case_list, shorten_condition, info, number_var, replace_list, truth_table }
 }
 
