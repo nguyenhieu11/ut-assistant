@@ -8,7 +8,6 @@ export function preorderTraversal(root) {
     // visited nodes.
 
     let preorder = [];
-    console.log("Start Func")
     console.log(preorder)
     preorder.push(root.mark);
     stack.push(root);
