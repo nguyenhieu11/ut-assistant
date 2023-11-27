@@ -54,8 +54,8 @@ namespace Test
 
     //=================BEGIN_AUTO_GEN_TC=================//
     /** 
-     * Check coverage case (!( F )&& F ) = F of condition:
-     *      (!(10 > g_var_1) && g_var_2)
+     * Check coverage case ( F && F ) = F of condition:
+     *      (g_var_1 < 10 && g_var_2 == 5)
     */
     TEST_F(ClassUnitTest, FUN_Test_TC1){
 
@@ -64,7 +64,7 @@ namespace Test
 
         /* Set value */
 		g_var_1 = 10;
-		g_var_2 = 0;
+		g_var_2 = 6;
         
         /* Call Stub function */
 		EXPECT_CALL(stubObj, Stub_func_1())
@@ -77,8 +77,8 @@ namespace Test
     }
         
     /** 
-     * Check coverage case (!( F )&& T ) = T of condition:
-     *      (!(10 > g_var_1) && g_var_2)
+     * Check coverage case ( F && T ) = F of condition:
+     *      (g_var_1 < 10 && g_var_2 == 5)
     */
     TEST_F(ClassUnitTest, FUN_Test_TC2){
 
@@ -87,12 +87,10 @@ namespace Test
 
         /* Set value */
 		g_var_1 = 10;
-		g_var_2 = 1;
+		g_var_2 = 5;
         
         /* Call Stub function */
-		EXPECT_CALL(stubObj, Stub_func_3())
-			.willRepeatly(Return());
-		EXPECT_CALL(stubObj, Stub_func_2())
+		EXPECT_CALL(stubObj, Stub_func_1())
 			.willRepeatly(Return());
 
         /* Call SUT */
@@ -102,8 +100,8 @@ namespace Test
     }
         
     /** 
-     * Check coverage case (!( T )&& F ) = F of condition:
-     *      (!(10 > g_var_1) && g_var_2)
+     * Check coverage case ( T && F ) = F of condition:
+     *      (g_var_1 < 10 && g_var_2 == 5)
     */
     TEST_F(ClassUnitTest, FUN_Test_TC3){
 
@@ -111,8 +109,8 @@ namespace Test
         Stub stubObj;
 
         /* Set value */
-		g_var_1 = 11;
-		g_var_2 = 0;
+		g_var_1 = 9;
+		g_var_2 = 6;
         
         /* Call Stub function */
 		EXPECT_CALL(stubObj, Stub_func_1())
@@ -125,8 +123,8 @@ namespace Test
     }
         
     /** 
-     * Check coverage case (!( T )&& T ) = F of condition:
-     *      (!(10 > g_var_1) && g_var_2)
+     * Check coverage case ( T && T ) = T of condition:
+     *      (g_var_1 < 10 && g_var_2 == 5)
     */
     TEST_F(ClassUnitTest, FUN_Test_TC4){
 
@@ -134,11 +132,13 @@ namespace Test
         Stub stubObj;
 
         /* Set value */
-		g_var_1 = 11;
-		g_var_2 = 1;
+		g_var_1 = 9;
+		g_var_2 = 5;
         
         /* Call Stub function */
-		EXPECT_CALL(stubObj, Stub_func_1())
+		EXPECT_CALL(stubObj, Stub_func_3())
+			.willRepeatly(Return());
+		EXPECT_CALL(stubObj, Stub_func_2())
 			.willRepeatly(Return());
 
         /* Call SUT */
