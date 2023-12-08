@@ -80,6 +80,14 @@ function getAssignValue(identifier, operator, var_value, condition_value) {
                 assign.value = parseInt(var_value);
             }
             break;
+        case '>=':
+            if (condition_value == 1) {
+                assign.value = parseInt(var_value);
+            }
+            else {
+                assign.value = parseInt(var_value) - 1;
+            }
+            break;
         case '<':
             if (condition_value == 1) {
                 assign.value = parseInt(var_value) - 1;
@@ -87,6 +95,14 @@ function getAssignValue(identifier, operator, var_value, condition_value) {
             else {
 
                 assign.value = parseInt(var_value);
+            }
+            break;
+        case '<=':
+            if (condition_value == 1) {
+                assign.value = parseInt(var_value);
+            }
+            else {
+                assign.value = parseInt(var_value) + 1;
             }
             break;
         case '==':
@@ -174,30 +190,31 @@ function getMcdcTable(condition) {
         }
     }
 
-    truth_table.forEach(t => {
+    truth_table.forEach(tr => {
         let test_str = ''
         for (let i_rp = 0; i_rp < replace_list.length; i_rp++) {
             /** 65: character 'A' */
-            test_str += `let ${replace_list[i_rp].character} = ` + t[`var_${String.fromCharCode(65 + i_rp)}`] + '; '
+            test_str += `let ${replace_list[i_rp].character} = ` + tr[`var_${String.fromCharCode(65 + i_rp)}`] + '; '
         }
         test_str += shorten_condition;
         console.log(test_str);
         console.log(eval(test_str))
-        t.result = eval(test_str);
+        tr.result = eval(test_str);
 
         // let result = test_str
     })
 
     /** Create test case form truth table */
     let test_case_list = []
-    truth_table.forEach(t => {
+
+    truth_table.forEach(tr => {
         let test_case = {}
-        test_case.ts_number = t['TC']
-        // test_case.description = `Check coverage ${t.result ? 'TRUE' : 'FALSE'} case of condition: ${info.condition}`
+        test_case.ts_number = tr['TC']
+        test_case.condition_result = tr['result']
 
         /** Assign value for variables */
         /** 1. Get list of replace character */
-        let obj_key = Object.keys(t);
+        let obj_key = Object.keys(tr);
         // test_case.obj_key = obj_key
         let character_list = []
         obj_key.forEach(obk => {
@@ -216,7 +233,7 @@ function getMcdcTable(condition) {
                     rp_condition = rp
                 }
             })
-            rp_condition.value = t[`var_${chr}`]
+            rp_condition.value = tr[`var_${chr}`]
             rp_condition_list.push(rp_condition)
         })
         // test_case.rp_condition_list = rp_condition_list
@@ -227,9 +244,12 @@ function getMcdcTable(condition) {
             let assign = {}
             if (Object.keys(cond).includes('binary_expression')) {
                 assign = getAssignFromBinaryExpression(cond.node, cond.value);
+                assign.mark = cond.mark
             } else if (Object.keys(cond).includes('identifier')) {
                 assign.identifier = cond.identifier
                 assign.value = cond.value
+                assign.mark = cond.mark
+
             }
             /** Get character and condition result for generate description step */
             assign.character = cond.character
@@ -255,8 +275,6 @@ function getMcdcTable(condition) {
         })
 
     })
-    // let result = 1
-    return test_case_list
-    // return { test_case_list, shorten_condition, info, number_var, replace_list, truth_table }
-}
 
+    return test_case_list
+}

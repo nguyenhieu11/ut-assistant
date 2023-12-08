@@ -1,22 +1,49 @@
-int g_var_1 = 0;
-int g_var_2 = 0;
 
-char FUN_Test(void)
+
+#include "E2E_MemMap.h"
+
+E2E_P05CheckStateType g_StatePtr;
+
+Std_ReturnType E2E_P05CheckInit()
 {
-    // if (10 > g_var_1)
-    if (g_var_1 < 10 && g_var_2 < 5)
-    // if (g_var_1){}
-    // if (!g_var_1){}
-    // if (!(g_var_1 > 10)){}
-    // if (10 > g_var_1 || g_var_1 > 1 && g_var_2)
-    // if (!(10 > g_var_1) && g_var_1){}
-    // if (10 > g_var_1 && !g_var_1)
-    // if (g_var_1 && g_var_2)
+    Std_ReturnType error_en = E2E_E_INTERR;
+
+    /* Check for NULL pointer */
+    if (NULL_PTR == g_StatePtr)
     {
-        Stub_more_than();
+        error_en = E2E_E_INPUTERR_NULL;
+        if (aaa == bbb)
+        {
+        }
     }
     else
     {
-        Stub_less_than();
+        /* Initialize Check state */
+        g_StatePtr->Counter = 0xFFU;
+        g_StatePtr->Status = E2E_PO5STATUS_ERROR;
+
+        /* no error occurred */
+        error_en = E2E_E_OK;
     }
+    return (error_en);
+}
+
+Std_ReturnType E2E_P05ProtectInit(E2E_P05ProtectStateType *StatePtr)
+{
+    Std_ReturnType error_en = E2E_E_INTERR;
+
+    /* Check for NULL pointer */
+    if (NULL_PTR == StatePtr)
+    {
+        error_en = E2E_E_INPUTERR_NULL;
+    }
+    else
+    {
+        /* Initialize Check state */
+        StatePtr->Counter = 0U;
+
+        /* no error occurred */
+        error_en = E2E_E_OK;
+    }
+    return (error_en);
 }

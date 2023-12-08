@@ -2,6 +2,11 @@ import express from 'express';
 import Parser from 'tree-sitter';
 import C from 'tree-sitter-c';
 import { traverse, traverseTypeOfLine } from './traverse.js';
+
+import util from 'util';
+
+import lodash from 'lodash';
+
 // import { cFunc } from './c-function.js';
 import {
     getFuncIdentifier,
@@ -12,19 +17,28 @@ import {
 } from './analyze-function.js'
 
 import {
-    markNumOfTree,
-    levelOrder
+    levelOrder,
+    levelOrderAsync
 } from './level-order-n-ary-tree.js'
 
 import {
     preorderTraversal,
-    findIfCondition,
-    getIfInfo,
+    // findIfCondition,
+    // getIfInfo,
     findBinaryExpression,
-    findIdentifier
+    findIdentifier,
+    checkPreorder,
+    markNumPreorderTree
 } from './preorder-traversal.js'
 
 import { getTestCaseList } from './decision/parse-decision.js'
+import { getCalledStubFunc } from './get-called-stub.js';
+
+import {
+    findIfCondition,
+    getIfInfo,
+    getIfInfoList
+} from './if-handle.js';
 
 import fs from 'fs'
 
@@ -39,7 +53,6 @@ import fs from 'fs'
 // Initialize the parser
 const parser = new Parser();
 parser.setLanguage(C);
-
 
 
 const app = express();
@@ -119,8 +132,8 @@ app.get('/get-ast', (req, res) => {
     const test_case_list = getTestCaseList(if_list_info);
 
     res.send({
-        test_case_list
-        // if_list_info,
+        test_case_list,
+        if_list,
         // preorder,
         // binary_expression_list
         // func_return_type,
@@ -208,38 +221,53 @@ app.get('/auto-generate', (req, res) => {
     if (!test_case_list.length) {
         res.send('No test case')
     }
+
+    /** Re-assign rootNode */
+    let re_assign_root = tree.rootNode;
+
+    preorderTraversal(re_assign_root);
+    let tc_list_add_func_call = getCalledStubFunc(re_assign_root, if_list, test_case_list);
+
     let insert_str = ''
-    test_case_list.forEach(tc => {
+    tc_list_add_func_call.forEach(tc => {
         let assing_str = ''
         tc.assign_list.forEach(as => {
-            assing_str += `${as.identifier} = ${as.value}; \n`
+            assing_str += `\n\t\t${as.identifier} = ${as.value};`
+        })
+
+        let func_call_str = ''
+        tc.inside_func_call_list.forEach(ifc => {
+            func_call_str += `\n\t\tEXPECT_CALL(stubObj, ${ifc.func_name}())\n\t\t\t.willRepeatly(Return());`
+        })
+        tc.outside_func_call_list.forEach(ofc => {
+            func_call_str += `\n\t\tEXPECT_CALL(stubObj, ${ofc.func_name}())\n\t\t\t.willRepeatly(Return());`
         })
 
         let tc_str = `
-        /** 
-         * Check coverage case ${tc.case_in_text}
-         *      ${tc.condition}
-        */
-        TEST_F(ClassUnitTest, FUN_Test_TC${tc.ts_number}){
+    /** 
+     * Check coverage case ${tc.case_in_text} = ${tc.condition_result ? 'T' : 'F'} of condition:
+     *      ${tc.condition}
+    */
+    TEST_F(ClassUnitTest, FUN_Test_TC${tc.ts_number}){
 
-            /* Test case declaration */
-            Stub stubObj;
+        /* Test case declaration */
+        Stub stubObj;
 
-            /* Set value */
-            ${assing_str}
-            
-            /* Call Stub function */
+        /* Set value */${assing_str}
+        
+        /* Call Stub function */${func_call_str}
 
-            /* Call SUT */
+        /* Call SUT */
+        FUN_Test();
+        /* Test case check for variables */
 
-            /* Test case check for variables */
-
-        }
+    }
         `
         insert_str += tc_str
     })
     // res.send(insert_str)
 
+    /**===== Start insert .cpp file =====*/
     let cpp_file_str = fs.readFileSync('../source-structure/example_01/test_example_01/test_example_01.cpp', 'utf8');
     // Find the position to insert the text
     const beginMarker = '//=================BEGIN_AUTO_GEN_TC=================//';
@@ -253,14 +281,43 @@ app.get('/auto-generate', (req, res) => {
         res.send('Markers not found in the file')
         return;
     }
-
     // Delete the text between markers and insert the new text
     const modifiedContent = cpp_file_str.slice(0, beginIndex + beginMarker.length) + insert_str + cpp_file_str.slice(endIndex);
-
     // Write the modified content back to the file
-
     fs.writeFileSync('../source-structure/example_01/test_example_01/test_example_01.cpp', modifiedContent, 'utf8');
     res.send(modifiedContent)
+    return;
+    /**===== End insert .cpp file =====*/
+
+});
+
+
+// Define a route for the API endpoint
+app.get('/restructor-auto-generate', async (req, res) => {
+    try {
+
+        let c_func_str = fs.readFileSync('../source-structure/example_01/example_01.c', 'utf8');
+        const tree = parser.parse(c_func_str);
+
+        let root_node = lodash.clone(tree.rootNode);
+        root_node = await markNumPreorderTree(root_node, 1);
+
+        let if_list = await findIfCondition(root_node);
+        let if_info_list = await getIfInfoList(if_list);
+
+        /** Need fix: test_case_list is array in array*/
+        const test_case_list = getTestCaseList(if_info_list)[0];
+        if (!test_case_list.length) {
+            res.send('No test case')
+        }
+
+        res.json(test_case_list)
+        return;
+    } catch (error) {
+        // Handle errors here
+        console.log(error);
+        res.status(500).send('Internal Server Error');
+    }
 });
 
 // app.get('/get-trust-table', (req, res) => {
