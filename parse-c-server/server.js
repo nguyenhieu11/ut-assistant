@@ -2,6 +2,11 @@ import express from 'express';
 import Parser from 'tree-sitter';
 import C from 'tree-sitter-c';
 import { traverse, traverseTypeOfLine } from './traverse.js';
+
+import util from 'util';
+
+import lodash from 'lodash';
+
 // import { cFunc } from './c-function.js';
 import {
     getFuncIdentifier,
@@ -12,20 +17,28 @@ import {
 } from './analyze-function.js'
 
 import {
-    markNumOfTree,
-    levelOrder
+    levelOrder,
+    levelOrderAsync
 } from './level-order-n-ary-tree.js'
 
 import {
     preorderTraversal,
-    findIfCondition,
-    getIfInfo,
+    // findIfCondition,
+    // getIfInfo,
     findBinaryExpression,
-    findIdentifier
+    findIdentifier,
+    checkPreorder,
+    markNumPreorderTree
 } from './preorder-traversal.js'
 
 import { getTestCaseList } from './decision/parse-decision.js'
 import { getCalledStubFunc } from './get-called-stub.js';
+
+import {
+    findIfCondition,
+    getIfInfo,
+    getIfInfoList
+} from './if-handle.js';
 
 import fs from 'fs'
 
@@ -40,7 +53,6 @@ import fs from 'fs'
 // Initialize the parser
 const parser = new Parser();
 parser.setLanguage(C);
-
 
 
 const app = express();
@@ -216,9 +228,6 @@ app.get('/auto-generate', (req, res) => {
     preorderTraversal(re_assign_root);
     let tc_list_add_func_call = getCalledStubFunc(re_assign_root, if_list, test_case_list);
 
-    // res.send(tc_list_add_func_call)
-    // return tc_list_add_func_call
-
     let insert_str = ''
     tc_list_add_func_call.forEach(tc => {
         let assing_str = ''
@@ -280,6 +289,35 @@ app.get('/auto-generate', (req, res) => {
     return;
     /**===== End insert .cpp file =====*/
 
+});
+
+
+// Define a route for the API endpoint
+app.get('/restructor-auto-generate', async (req, res) => {
+    try {
+
+        let c_func_str = fs.readFileSync('../source-structure/example_01/example_01.c', 'utf8');
+        const tree = parser.parse(c_func_str);
+
+        let root_node = lodash.clone(tree.rootNode);
+        root_node = await markNumPreorderTree(root_node, 1);
+
+        let if_list = await findIfCondition(root_node);
+        let if_info_list = await getIfInfoList(if_list);
+
+        /** Need fix: test_case_list is array in array*/
+        const test_case_list = getTestCaseList(if_info_list)[0];
+        if (!test_case_list.length) {
+            res.send('No test case')
+        }
+
+        res.json(test_case_list)
+        return;
+    } catch (error) {
+        // Handle errors here
+        console.log(error);
+        res.status(500).send('Internal Server Error');
+    }
 });
 
 // app.get('/get-trust-table', (req, res) => {

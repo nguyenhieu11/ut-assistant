@@ -2,7 +2,8 @@ import { isInsideNode, getNodeType } from "./tree-algorithms/tree-helper.js";
 
 export function getCalledStubFunc(root_node, if_list, test_case_list) {
 
-    let all_call_expression = getNodeType(root_node, 'call_expression');
+    // let all_call_expression = getNodeType(root_node, 'call_expression');
+
 
     // let debug = {}
     test_case_list.forEach(tc => {
@@ -11,6 +12,8 @@ export function getCalledStubFunc(root_node, if_list, test_case_list) {
                 // get node of if condition corresponding with condition of assign_list
                 let if_of_tc = ie.node
                 let compound_statement_list = getNodeType(if_of_tc, 'compound_statement');
+                console.log(compound_statement_list);
+
                 let call_expression_list = getNodeType(if_of_tc, 'call_expression');
                 // debug.call_expression_list = call_expression_list;
                 // debug.compound_statement_list = compound_statement_list
@@ -29,61 +32,69 @@ export function getCalledStubFunc(root_node, if_list, test_case_list) {
 
                 let inside_func_call_list = []
                 call_expression_list.forEach(ce => {
-                    if (isInsideNode(compound.node, ce.mark)) {
-                        let func_info = {}
-                        ce.node.children.forEach(cec => {
-                            if (cec.type == 'identifier') {
-                                func_info.func_name = cec.text;
-                                func_info.mark = ce.mark
-                            }
-                        })
-                        inside_func_call_list.push(func_info);
+                    if (compound.node != undefined) {
+                        if (isInsideNode(compound.node, ce.mark)) {
+                            let func_info = {}
+                            ce.node.children.forEach(cec => {
+                                if (cec.type == 'identifier') {
+                                    func_info.func_name = cec.text;
+                                    func_info.mark = ce.mark
+                                }
+                            })
+                            inside_func_call_list.push(func_info);
+                        }
                     }
+
                 })
                 tc.compound = compound
                 tc.inside_func_call_list = inside_func_call_list
+                // tc.all_call_expression = all_call_expression
             }
         })
     });
-    /** Get called function outside condition */
-    test_case_list.forEach(tc => {
-        let outside_func_call_list = []
-        all_call_expression.forEach(ce => {
-            let func_name = ''
-            ce.node.children.forEach(cec => {
-                if (cec.type == 'identifier') {
-                    func_name = cec.text
-                }
-            })
+    // /** Get called function outside condition */
+    // test_case_list.forEach(tc => {
+    //     let outside_func_call_list = []
+    //     all_call_expression.forEach(ce => {
+    //         let func_name = ''
+    //         ce.node.children.forEach(cec => {
+    //             if (cec.type == 'identifier') {
+    //                 func_name = cec.text
+    //             }
+    //         })
 
-            let is_called = false;
-            tc.inside_func_call_list.forEach(ifc => {
-                if (ifc.func_name == func_name) {
-                    is_called = true;
-                }
-            })
-            if (!is_called) {
-                /** Check this function is existed inside the corresponding compound */
-                if (isInsideNode(tc.compound.node, ce.node.mark)) {
-                    let func_info = {
-                        func_name: func_name,
-                        mark: ce.mark
-                    }
-                    outside_func_call_list.push(func_info);
-                }
-
-
-            }
-        })
-        tc.outside_func_call_list = outside_func_call_list
-    })
+    //         let is_called = false;
+    //         tc.inside_func_call_list.forEach(ifc => {
+    //             if (ifc.func_name == func_name) {
+    //                 is_called = true;
+    //             }
+    //         })
+    //         if (!is_called && tc.compound.node != undefined) {
+    //             /** Check this function is existed inside the corresponding compound */
+    //             console.log("ce.node.mark");
+    //             console.log(ce.node.mark);
+    //             console.log("tc.compound.node");
+    //             console.log(tc.compound.node);
+    //             console.log("tc.compound.node.mark");
+    //             console.log(tc.compound.node.mark);
+    //             if (isInsideNode(tc.compound.node, ce.node.mark)) {
+    //                 let func_info = {
+    //                     func_name: func_name,
+    //                     mark: ce.mark
+    //                 }
+    //                 outside_func_call_list.push(func_info);
+    //             }
+    //         }
+    //     })
+    //     tc.outside_func_call_list = outside_func_call_list
+    // })
 
     /** Remove compound field in return data */
-    test_case_list.forEach(tc => {
-        if (tc.compound) {
-            delete tc.compound
-        }
-    })
+    // test_case_list.forEach(tc => {
+    //     if (tc.compound) {
+    //         delete tc.compound
+    //     }
+    // })
 
     return test_case_list
 }
