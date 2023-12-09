@@ -17,7 +17,7 @@ Std_ReturnType E2E_P05CheckInit()
     {
         /* Initialize Check state */
         g_StatePtr->Counter = 0xFFU;
-        g_StatePtr->Status = E2E_PO5STATUS_ERROR;
+        g_StatePtr->Status = E2E_P05STATUS_ERROR;
 
         /* no error occurred */
         error_en = E2E_E_OK;
