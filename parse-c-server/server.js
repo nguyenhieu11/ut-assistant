@@ -41,6 +41,7 @@ import {
 } from './if-handle.js';
 
 import fs from 'fs'
+import { findEnumerator, findPreProcDefine } from './predefine-handle.js';
 
 // import {
 //     getTrustTable
@@ -296,22 +297,36 @@ app.get('/auto-generate', (req, res) => {
 app.get('/restructor-auto-generate', async (req, res) => {
     try {
 
+        /** Get pre-define */
+        let stub_header_str = fs.readFileSync('../source-structure/example_01/test_example_01/test_example_01.h', 'utf8');
+        const header_tree = parser.parse(stub_header_str);
+        let header_root = lodash.clone(header_tree.rootNode);
+        header_root = await markNumPreorderTree(header_root, 1);
+        const preproc_list = await findPreProcDefine(header_root);
+        const enum_list = await findEnumerator(header_root);
+
         let c_func_str = fs.readFileSync('../source-structure/example_01/example_01.c', 'utf8');
+
         const tree = parser.parse(c_func_str);
 
         let root_node = lodash.clone(tree.rootNode);
         root_node = await markNumPreorderTree(root_node, 1);
-
         let if_list = await findIfCondition(root_node);
         let if_info_list = await getIfInfoList(if_list);
 
         /** Need fix: test_case_list is array in array*/
-        const test_case_list = getTestCaseList(if_info_list)[0];
+        const test_case_list = getTestCaseList(if_info_list, preproc_list, enum_list);
         if (!test_case_list.length) {
             res.send('No test case')
         }
 
-        res.json(test_case_list)
+
+
+        res.json({
+            test_case_list,
+            preproc_list,
+            enum_list
+        })
         return;
     } catch (error) {
         // Handle errors here

@@ -208,13 +208,6 @@ export async function getIfInfoList(if_list) {
                     valid_binary_expression_list = binary_expression_list
                 }
             })
-
-            // if_info_list.push({
-            //     info,
-            //     child_if_list,
-            //     binary_expression_list,
-            //     identifier_list
-            // })
             if_info_list.push({
                 par_mark: e.node.par_mark,
                 mark: e.node.mark,
@@ -226,9 +219,8 @@ export async function getIfInfoList(if_list) {
             })
 
         }
-
-        console.log('if_info_list ======================');
-        console.log(if_info_list);
+        // console.log('if_info_list ======================');
+        // console.log(if_info_list);
         return if_info_list
     } catch (error) {
         throw error;

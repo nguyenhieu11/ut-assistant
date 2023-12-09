@@ -1,16 +1,16 @@
 
 
 
-export function getTestCaseList(if_list_info) {
+export function getTestCaseList(if_list_info, preproc_list, enumerator_list) {
     let all_test_case = []
     if_list_info.forEach(ili => {
-        let ts_each_condition = parseTestCase(ili)
+        let ts_each_condition = parseTestCase(ili, preproc_list, enumerator_list)
         all_test_case.push(ts_each_condition);
     });
     return all_test_case
 }
 
-function parseTestCase(condition_info) {
+function parseTestCase(condition_info, preproc_list, enumerator_list) {
     /**===== Begin pre-process ===== */
     let condition = condition_info
     /** delete .node */
@@ -60,7 +60,7 @@ function parseTestCase(condition_info) {
     condition.number_var = i_replace;
     condition.replace_list = replace_list
     /**===== End pre-process ===== */
-    let mcdc_table = getMcdcTable(condition);
+    let mcdc_table = getMcdcTable(condition, preproc_list, enumerator_list);
     return mcdc_table
 }
 
@@ -120,7 +120,7 @@ function getAssignValue(identifier, operator, var_value, condition_value) {
     return assign;
 }
 
-function getAssignFromBinaryExpression(binary_expression_node, condition_value) {
+function getAssignFromBinaryExpression(binary_expression_node, condition_value, preproc_list, enumerator_list) {
     const node = binary_expression_node;
     if (node.children.length == 3) {
         const left = node.children[0];
@@ -133,6 +133,9 @@ function getAssignFromBinaryExpression(binary_expression_node, condition_value) 
         else if (left.type == 'number_literal' && right.type == 'identifier') {
             assign_value = getAssignValue(right.text, operator.text, left.text, condition_value);
         }
+        else if (left.type == 'identifier' && right.type == 'identifier') {
+            console.log({ left_text: left.text, right_text: right.text, operator_text: operator.text })
+        }
         return assign_value
     }
     else {
@@ -142,7 +145,7 @@ function getAssignFromBinaryExpression(binary_expression_node, condition_value) 
     return {}
 }
 
-function getMcdcTable(condition) {
+function getMcdcTable(condition, preproc_list, enumerator_list) {
     let { info, number_var, replace_list } = condition;
     const condition_text = info.condition
 
@@ -243,7 +246,7 @@ function getMcdcTable(condition) {
         rp_condition_list.forEach(cond => {
             let assign = {}
             if (Object.keys(cond).includes('binary_expression')) {
-                assign = getAssignFromBinaryExpression(cond.node, cond.value);
+                assign = getAssignFromBinaryExpression(cond.node, cond.value, preproc_list, enumerator_list);
                 assign.mark = cond.mark
             } else if (Object.keys(cond).includes('identifier')) {
                 assign.identifier = cond.identifier
