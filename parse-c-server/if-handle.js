@@ -6,7 +6,7 @@ import { findIdentifier } from './identifier-handle.js';
 
 export async function findIfCondition(root_node) {
     try {
-        console.log("run findIfCondition");
+        // console.log("run findIfCondition");
         let temp_root = lodash.clone(root_node);
         /** Try to re-mark the tree */
         if (!(await checkPreorder(temp_root))) {
@@ -43,7 +43,7 @@ export async function findIfCondition(root_node) {
 
 export async function findChildIfCondition(root_node) {
     try {
-        console.log("run findChildIfCondition");
+        // console.log("run findChildIfCondition");
         let temp_root = lodash.clone(root_node);
         /** Try to re-mark the tree */
         if (!(await checkPreorder(temp_root))) {
@@ -90,7 +90,7 @@ export async function findChildIfCondition(root_node) {
 export async function findBinaryExpression(root_node) {
 
     try {
-        console.log("run findBinaryExpression");
+        // console.log("run findBinaryExpression");
         let temp_root = lodash.clone(root_node);
         /** Try to re-mark the tree */
         if (!(await checkPreorder(temp_root))) {
@@ -165,7 +165,7 @@ export async function getIfInfo(node) {
 
 export async function getIfInfoList(if_list) {
     try {
-        console.log('run getIfInfoList');
+        // console.log('run getIfInfoList');
         let if_info_list = []
 
         let temp_if_list = lodash.clone(if_list);
@@ -208,13 +208,6 @@ export async function getIfInfoList(if_list) {
                     valid_binary_expression_list = binary_expression_list
                 }
             })
-
-            // if_info_list.push({
-            //     info,
-            //     child_if_list,
-            //     binary_expression_list,
-            //     identifier_list
-            // })
             if_info_list.push({
                 par_mark: e.node.par_mark,
                 mark: e.node.mark,
@@ -226,9 +219,8 @@ export async function getIfInfoList(if_list) {
             })
 
         }
-
-        console.log('if_info_list ======================');
-        console.log(if_info_list);
+        // console.log('if_info_list ======================');
+        // console.log(if_info_list);
         return if_info_list
     } catch (error) {
         throw error;
