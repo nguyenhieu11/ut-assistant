@@ -42,6 +42,9 @@ import {
 
 import fs from 'fs'
 import { findEnumerator, findPreProcDefine } from './predefine-handle.js';
+import { findTestFunc } from './test-func.js';
+import { generateTestCaseString } from './test-file-template.js';
+import { findGlobalVar } from './identifier-handle.js';
 
 // import {
 //     getTrustTable
@@ -306,7 +309,6 @@ app.get('/restructor-auto-generate', async (req, res) => {
         const enum_list = await findEnumerator(header_root);
 
         let c_func_str = fs.readFileSync('../source-structure/example_01/example_01.c', 'utf8');
-
         const tree = parser.parse(c_func_str);
 
         let root_node = lodash.clone(tree.rootNode);
@@ -314,18 +316,42 @@ app.get('/restructor-auto-generate', async (req, res) => {
         let if_list = await findIfCondition(root_node);
         let if_info_list = await getIfInfoList(if_list);
 
+        let test_func_list = await findTestFunc(root_node);
+
+
         /** Need fix: test_case_list is array in array*/
         const test_case_list = getTestCaseList(if_info_list, preproc_list, enum_list);
         if (!test_case_list.length) {
             res.send('No test case')
         }
 
+        test_case_list.forEach(tc_group => {
+            if (tc_group.length) {
+                tc_group.forEach(tc => {
+                    tc.compound = {}
+                    tc.inside_func_call_list = []
+                })
+            }
+        })
 
+        const global_var_list = await findGlobalVar(root_node);
+        // res.send(global_var_list)
+
+        const test_case_string = await generateTestCaseString(test_case_list, test_func_list, global_var_list);
+        res.send(test_case_string)
+
+
+
+        // res.send({ test_case_list, test_func_list, test_case_string, global_var_list });
+
+
+        // res.json({ test_case_list, test_func_list, insert_str })
+        return;
 
         res.json({
             test_case_list,
-            preproc_list,
-            enum_list
+            // preproc_list,
+            // enum_list
         })
         return;
     } catch (error) {
