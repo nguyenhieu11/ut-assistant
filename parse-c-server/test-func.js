@@ -28,6 +28,9 @@ export async function findTestFunc(root_node) {
                 for (const lv_2 of lv_1.children) {
                     if (lv_2.type == 'type_identifier') {
                         func.type_identifier = lv_2.text;
+                    }
+                    else if (lv_2.type == 'primitive_type') {
+                        func.primitive_type = lv_2.text
                     } else if (lv_2.type == 'function_declarator') {
                         func.function_declarator = lv_2.text;
                         for (const lv_3 of lv_2.children) {

@@ -43,8 +43,9 @@ import {
 import fs from 'fs'
 import { findEnumerator, findPreProcDefine } from './predefine-handle.js';
 import { findTestFunc } from './test-func.js';
-import { generateTestCaseString } from './test-file-template.js';
+import { generateExternGlobalVariableString, generateExternTestFuncString, generateTestCaseString } from './test-file-template.js';
 import { findGlobalVar } from './identifier-handle.js';
+import { insertToTestFile } from './testing-file-handle.js';
 
 // import {
 //     getTrustTable
@@ -299,16 +300,27 @@ app.get('/auto-generate', (req, res) => {
 // Define a route for the API endpoint
 app.get('/restructor-auto-generate', async (req, res) => {
     try {
-
+        let test_folder_path = ''
+        let test_module_name = ''
+        if (req.query.absolute_path_of_testing_folder) {
+            console.log('absolute_path_of_testing_folder');
+            console.log(req.query.absolute_path_of_testing_folder);
+            test_folder_path = req.query.absolute_path_of_testing_folder
+        }
+        if (req.query.module_name) {
+            console.log('test_module_name');
+            console.log(req.query.module_name);
+            test_module_name = req.query.module_name.replace('.c', '');
+        }
         /** Get pre-define */
-        let stub_header_str = fs.readFileSync('../source-structure/example_01/test_example_01/test_example_01.h', 'utf8');
+        let stub_header_str = fs.readFileSync(`${test_folder_path}/test_${test_module_name}/test_${test_module_name}.h`, 'utf8');
         const header_tree = parser.parse(stub_header_str);
         let header_root = lodash.clone(header_tree.rootNode);
         header_root = await markNumPreorderTree(header_root, 1);
         const preproc_list = await findPreProcDefine(header_root);
         const enum_list = await findEnumerator(header_root);
 
-        let c_func_str = fs.readFileSync('../source-structure/example_01/example_01.c', 'utf8');
+        let c_func_str = fs.readFileSync(`${test_folder_path}/${test_module_name}.c`, 'utf8');
         const tree = parser.parse(c_func_str);
 
         let root_node = lodash.clone(tree.rootNode);
@@ -317,7 +329,6 @@ app.get('/restructor-auto-generate', async (req, res) => {
         let if_info_list = await getIfInfoList(if_list);
 
         let test_func_list = await findTestFunc(root_node);
-
 
         /** Need fix: test_case_list is array in array*/
         const test_case_list = getTestCaseList(if_info_list, preproc_list, enum_list);
@@ -335,24 +346,14 @@ app.get('/restructor-auto-generate', async (req, res) => {
         })
 
         const global_var_list = await findGlobalVar(root_node);
-        // res.send(global_var_list)
+        const test_case_str = await generateTestCaseString(test_case_list, test_func_list, global_var_list);
 
-        const test_case_string = await generateTestCaseString(test_case_list, test_func_list, global_var_list);
-        res.send(test_case_string)
+        const extern_func_str = await generateExternTestFuncString(test_func_list);
+        const extern_global_var_str = await generateExternGlobalVariableString(global_var_list);
 
+        const final_content = await insertToTestFile(test_folder_path, test_module_name, test_case_str, extern_func_str, extern_global_var_str)
 
-
-        // res.send({ test_case_list, test_func_list, test_case_string, global_var_list });
-
-
-        // res.json({ test_case_list, test_func_list, insert_str })
-        return;
-
-        res.json({
-            test_case_list,
-            // preproc_list,
-            // enum_list
-        })
+        res.send({ test_case_list, test_func_list, global_var_list, final_content });
         return;
     } catch (error) {
         // Handle errors here

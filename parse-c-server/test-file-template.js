@@ -57,7 +57,7 @@ export async function generateTestCaseString(test_case_list, test_func_list, glo
                         if (!get_type_ok) {
                             console.log(`Cannot get type of ${as.identifier} with global_var and parameter_list`)
                         }
-                        assing_str += `\n\t\t ${type_of_var} map_data[1]; \n\t\t${as.identifier} = map_data;`
+                        assing_str += `\n\t\t ${type_of_var} map_${as.identifier}[1]; \n\t\t${as.identifier} = map_${as.identifier};`
                     }
                     else {
                         assing_str += `\n\t\t${as.identifier} = ${as.value};`
@@ -71,18 +71,18 @@ export async function generateTestCaseString(test_case_list, test_func_list, glo
                             let expected_global_var = {}
                             expected_global_var.identifier = as.identifier;
                             expected_global_var.value = as.value
-                            console.log('as');
-                            console.log(as)
-                            console.log('expected_global_var')
-                            console.log(expected_global_var)
+                            // console.log('as');
+                            // console.log(as)
+                            // console.log('expected_global_var')
+                            // console.log(expected_global_var)
                             expected_global_var_list.push(expected_global_var);
                         }
                     }
                 })
                 let expected_global_var_str = ''
                 expected_global_var_list.forEach(exp_g_var => {
-                    console.log('exp_g_var')
-                    console.log(exp_g_var)
+                    // console.log('exp_g_var')
+                    // console.log(exp_g_var)
                     expected_global_var_str += `EXPECTED_EQ(${exp_g_var.identifier}, ${exp_g_var.value});\n\t\t`
                 })
 
@@ -120,18 +120,18 @@ export async function generateTestCaseString(test_case_list, test_func_list, glo
                         for (const decl of func.declarator_list) {
                             if (decl.primitive_type) {
                                 if (decl.identifier) {
-                                    declaration_of_func_str += `${decl.primitive_type} ${decl.identifier};`
+                                    declaration_of_func_str += `${decl.primitive_type} ${decl.identifier};\n\t\t`
                                     param_of_func_str += `${decl.identifier},`
                                 } else if (decl.pointer_declarator) {
-                                    declaration_of_func_str += `${decl.primitive_type} ${decl.pointer_declarator};`
+                                    declaration_of_func_str += `${decl.primitive_type} ${decl.pointer_declarator};\n\t\t`
                                     param_of_func_str += `${decl.pointer_declarator.replace('*', '')},`
                                 }
                             } else if (decl.type_identifier) {
                                 if (decl.identifier) {
-                                    declaration_of_func_str += `${decl.type_identifier} ${decl.identifier};`
+                                    declaration_of_func_str += `${decl.type_identifier} ${decl.identifier};\n\t\t`
                                     param_of_func_str += `${decl.identifier},`
                                 } else if (decl.pointer_declarator) {
-                                    declaration_of_func_str += `${decl.type_identifier} ${decl.pointer_declarator};`
+                                    declaration_of_func_str += `${decl.type_identifier} ${decl.pointer_declarator};\n\t\t`
                                     param_of_func_str += `${decl.pointer_declarator.replace('*', '')},`
                                 }
                             }
@@ -141,29 +141,29 @@ export async function generateTestCaseString(test_case_list, test_func_list, glo
                 param_of_func_str = param_of_func_str.slice(0, -1);
 
                 let tc_str = `
-                /** 
-                 * Check coverage case ${tc.case_in_text} = ${tc.condition_result ? 'T' : 'F'} of condition:
-                 *      ${tc.condition}
-                */
-                TEST_F(ClassUnitTest, ${func_name_str}_TC${tc.ts_number}){
-    
-                    /* Test case declaration */
-                    Stub stubObj;
-                    ${declaration_of_func_str}
-                    ${expected_return_of_func.declaration_str}
-                
-                    /* Set value */${assing_str}
-    
-                    /* Call Stub function */${func_call_str}
-    
-                    /* Call SUT */
-                    ${expected_return_of_func.return_str} ${func_name_str}(${param_of_func_str});
+    /** 
+     * Check coverage case ${tc.case_in_text} = ${tc.condition_result ? 'T' : 'F'} of condition:
+     *      ${tc.condition}
+    */
+    TEST_F(ClassUnitTest, ${func_name_str}_TC${tc.ts_number}){
 
-                    /* Test case check for variables */
-                    ${expected_return_of_func.check_eq_str}
-                    ${expected_global_var_str}
-                }
-                    `
+        /* Test case declaration */
+        Stub stubObj;
+        ${declaration_of_func_str}
+        ${expected_return_of_func.declaration_str}
+
+        /* Set value */${assing_str}
+
+        /* Call Stub function */${func_call_str}
+
+        /* Call SUT */
+        ${expected_return_of_func.return_str} ${func_name_str}(${param_of_func_str});
+
+        /* Test case check for variables */
+        ${expected_return_of_func.check_eq_str}
+        ${expected_global_var_str}
+    }
+        `
                 insert_str += tc_str
             })
         }
@@ -171,6 +171,40 @@ export async function generateTestCaseString(test_case_list, test_func_list, glo
 
         return insert_str;
 
+
+    } catch (error) {
+        throw error;
+    }
+}
+
+export async function generateExternTestFuncString(test_func_list) {
+    try {
+        let insert_str = ''
+        for (const func of test_func_list) {
+            if (func.primitive_type) {
+                insert_str += `\n extern "C" ${func.primitive_type} ${func.function_declarator};`
+            } else if (func.type_identifier) {
+                insert_str += `\n extern "C" ${func.type_identifier} ${func.function_declarator};`
+            }
+        }
+        return insert_str;
+
+    } catch (error) {
+        throw error;
+    }
+}
+
+export async function generateExternGlobalVariableString(global_var_list) {
+    try {
+        let insert_str = ''
+        for (const g_var of global_var_list) {
+            if (g_var.primitive_type) {
+                insert_str += `\n extern ${g_var.primitive_type} ${g_var.identifier};`
+            } else if (g_var.type_identifier) {
+                insert_str += `\n extern ${g_var.type_identifier} ${g_var.identifier};`
+            }
+        }
+        return insert_str;
 
     } catch (error) {
         throw error;

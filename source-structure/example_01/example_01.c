@@ -2,30 +2,25 @@
 
 #include "E2E_MemMap.h"
 
-E2E_P05CheckStateType g_StatePtr;
+int g_Count = 1;
 
-Std_ReturnType E2E_P05CheckInit()
+void E2E_P05CheckInit()
 {
     Std_ReturnType error_en = E2E_E_INTERR;
 
     /* Check for NULL pointer */
-    if (NULL_PTR == g_StatePtr)
+    if (1 == g_Count)
     {
         error_en = E2E_E_INPUTERR_NULL;
     }
     else
     {
-        /* Initialize Check state */
-        g_StatePtr->Counter = 0xFFU;
-        g_StatePtr->Status = E2E_P05STATUS_ERROR;
-
-        /* no error occurred */
         error_en = E2E_E_OK;
     }
     return (error_en);
 }
 
-Std_ReturnType E2E_P05ProtectInit(E2E_P05ProtectStateType *StatePtr)
+Std_ReturnType E2E_P05ProtectInit(int *StatePtr)
 {
     Std_ReturnType error_en = E2E_E_INTERR;
 

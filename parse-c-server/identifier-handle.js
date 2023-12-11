@@ -3,7 +3,7 @@ import { markNumPreorderTree, checkPreorder } from './preorder-traversal.js';
 
 export async function findIdentifier(root_node) {
     try {
-        console.log("run findIdentifier");
+        // console.log("run findIdentifier");
         let temp_root = lodash.clone(root_node);
         /** Try to re-mark the tree */
         if (!(await checkPreorder(temp_root))) {
@@ -43,7 +43,7 @@ export async function findIdentifier(root_node) {
 
 export async function findGlobalVar(root_node) {
     try {
-        console.log("run findGlobalVar");
+        // console.log("run findGlobalVar");
         if (root_node.type !== 'translation_unit') {
             console.log('Error: This node is NOT root of c file');
             return [];
