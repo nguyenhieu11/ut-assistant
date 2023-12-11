@@ -1,6 +1,11 @@
 
 
 
+/** IDENTIFIER AS VALUE */
+const IDENTIFIER_AS_VALUE = [
+    "NULL_PTR"
+]
+
 export function getTestCaseList(if_list_info, preproc_list, enumerator_list) {
     let all_test_case = []
     if_list_info.forEach(ili => {
@@ -13,6 +18,8 @@ export function getTestCaseList(if_list_info, preproc_list, enumerator_list) {
 function parseTestCase(condition_info, preproc_list, enumerator_list) {
     /**===== Begin pre-process ===== */
     let condition = condition_info
+
+
     /** delete .node */
     if (condition.info.node) {
         delete condition.info.node
@@ -64,7 +71,7 @@ function parseTestCase(condition_info, preproc_list, enumerator_list) {
     return mcdc_table
 }
 
-function getAssignValue(identifier, operator, var_value, condition_value) {
+function getAssignValueWithNumber(identifier, operator, var_value, condition_value) {
     let assign = {}
 
     // console.log({ identifier, operator, var_value, condition_value })
@@ -120,6 +127,86 @@ function getAssignValue(identifier, operator, var_value, condition_value) {
     return assign;
 }
 
+
+function getAssignValueWithIdentifier(right, operator, left, condition_value, preproc_list, enumerator_list) {
+    let assign = {}
+    let var_value;
+    // console.log({ identifier, operator, var_value, condition_value })
+
+
+
+    if (IDENTIFIER_AS_VALUE.includes(right)) {
+        assign.identifier = left;
+        var_value = right;
+    } else if (IDENTIFIER_AS_VALUE.includes(left)) {
+        assign.identifier = right;
+        var_value = left;
+    }
+    else {
+        console.log("Right and left are both identifiers")
+    }
+
+    switch (operator) {
+        case '>':
+            if (condition_value == 1) {
+                assign.value = parseInt(var_value) + 1;
+            }
+            else {
+
+                assign.value = parseInt(var_value);
+            }
+            break;
+        case '>=':
+            if (condition_value == 1) {
+                assign.value = parseInt(var_value);
+            }
+            else {
+                assign.value = parseInt(var_value) - 1;
+            }
+            break;
+        case '<':
+            if (condition_value == 1) {
+                assign.value = parseInt(var_value) - 1;
+            }
+            else {
+
+                assign.value = parseInt(var_value);
+            }
+            break;
+        case '<=':
+            if (condition_value == 1) {
+                assign.value = parseInt(var_value);
+            }
+            else {
+                assign.value = parseInt(var_value) + 1;
+            }
+            break;
+        case '==':
+            if (condition_value == 1) {
+                switch (var_value) {
+                    case "NULL_PTR":
+                        assign.value = 'NULL_PTR'
+                        break;
+                    default: break
+                }
+            }
+            else {
+                switch (var_value) {
+                    case "NULL_PTR":
+                        assign.value = 'NOT_NULL_PTR'
+                        break;
+                    default: break
+                }
+            }
+            break;
+
+        default:
+            break;
+    }
+    return assign;
+}
+
+
 function getAssignFromBinaryExpression(binary_expression_node, condition_value, preproc_list, enumerator_list) {
     const node = binary_expression_node;
     if (node.children.length == 3) {
@@ -128,14 +215,16 @@ function getAssignFromBinaryExpression(binary_expression_node, condition_value, 
         const right = node.children[2];
         let assign_value = {}
         if (left.type == 'identifier' && right.type == 'number_literal') {
-            assign_value = getAssignValue(left.text, operator.text, right.text, condition_value);
+            assign_value = getAssignValueWithNumber(left.text, operator.text, right.text, condition_value);
         }
         else if (left.type == 'number_literal' && right.type == 'identifier') {
-            assign_value = getAssignValue(right.text, operator.text, left.text, condition_value);
+            assign_value = getAssignValueWithNumber(right.text, operator.text, left.text, condition_value);
         }
         else if (left.type == 'identifier' && right.type == 'identifier') {
-            console.log({ left_text: left.text, right_text: right.text, operator_text: operator.text })
+            assign_value = getAssignValueWithIdentifier(right.text, operator.text, left.text, condition_value, preproc_list, enumerator_list);
         }
+        assign_value.startPosition = node.startPosition;
+        assign_value.endPosition = node.endPosition;
         return assign_value
     }
     else {
@@ -146,7 +235,7 @@ function getAssignFromBinaryExpression(binary_expression_node, condition_value, 
 }
 
 function getMcdcTable(condition, preproc_list, enumerator_list) {
-    let { info, number_var, replace_list } = condition;
+    let { info, number_var, replace_list, startPosition, endPosition } = condition;
     const condition_text = info.condition
 
     let shorten_condition = condition_text;
@@ -275,6 +364,8 @@ function getMcdcTable(condition, preproc_list, enumerator_list) {
             })
             ts.case_in_text = case_in_text
             ts.condition = condition_text
+            ts.startPosition = info.startPosition
+            ts.endPosition = info.endPosition
         })
 
     })
