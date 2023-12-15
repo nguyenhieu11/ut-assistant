@@ -397,7 +397,7 @@ export async function markNumPreorderTree(root_node, start_num) {
             await markNumPreorderRecursive(temp_root);
             mark_ok = await checkPreorder(temp_root);
             if (mark_ok) {
-                console.log(`check preorder ok with try times: ${i + 1}`)
+                console.log(`check preorder OK with try times: ${i + 1}`)
                 break;
             }
         }
@@ -429,7 +429,7 @@ export async function markNumPreorderTree(root_node, start_num) {
 //     })
 //     if (res_ok) {
 //         dbg_arr.push(preorder)
-//         console.log(`check preorder ok with try times: ${i + 1}`)
+//         console.log(`check preorder OK with try times: ${i + 1}`)
 //     }
 // }
 

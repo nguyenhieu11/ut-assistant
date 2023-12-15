@@ -49,7 +49,7 @@ export async function insertToTestFile(folder_path, module_name, test_case_str, 
         modifiedContent = modifiedContent.slice(0, beginIndex_EXTERN_VARIABLE + beginMarker_EXTERN_VARIABLE.length) + extern_global_var_str + '\n' + modifiedContent.slice(endIndex_EXTERN_VARIABLE);
         // Write the modified content back to the file
 
-        fs.writeFileSync(`${folder_path}/test_${module_name}/test_${module_name}.cpp`, modifiedContent, 'utf8');
+        // fs.writeFileSync(`${folder_path}/test_${module_name}/test_${module_name}.cpp`, modifiedContent, 'utf8');
         return modifiedContent
     } catch (error) {
         throw error;

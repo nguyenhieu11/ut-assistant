@@ -4,7 +4,7 @@ import { findIdentifier } from './identifier-handle.js';
 
 export async function findPreProcDefine(root_node) {
     try {
-        // console.log("run findPreProcDefine");
+        console.log("run findPreProcDefine");
         let temp_root = lodash.clone(root_node);
         /** Try to re-mark the tree */
         if (!(await checkPreorder(temp_root))) {
@@ -49,7 +49,7 @@ export async function findPreProcDefine(root_node) {
 
 export async function findEnumerator(root_node) {
     try {
-        // console.log("run findEnumerator");
+        console.log("run findEnumerator");
         let temp_root = lodash.clone(root_node);
         /** Try to re-mark the tree */
         if (!(await checkPreorder(temp_root))) {

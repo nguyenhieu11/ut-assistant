@@ -349,10 +349,11 @@ app.get('/restructor-auto-generate', async (req, res) => {
         const test_case_str = await generateTestCaseString(test_case_list, test_func_list, global_var_list);
 
         const extern_func_str = await generateExternTestFuncString(test_func_list);
-        const extern_global_var_str = await generateExternGlobalVariableString(global_var_list);
+        const extern_global_var_str = await generateExternGlobalVariableString(global_var_list, test_module_name);
 
         const final_content = await insertToTestFile(test_folder_path, test_module_name, test_case_str, extern_func_str, extern_global_var_str)
 
+        // res.send(final_content);
         res.send({ test_case_list, test_func_list, global_var_list, final_content });
         return;
     } catch (error) {
