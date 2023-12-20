@@ -59,7 +59,7 @@ export async function findGlobalVar(root_node) {
         /** Find if condition with recursive */
 
         let global_var_list = [];
-        for (const lv_1 of root_node.children) {
+        for (const lv_1 of temp_root.children) {
             if (lv_1.type == 'declaration') {
                 let global_var = {}
                 for (const lv_2 of lv_1.children) {

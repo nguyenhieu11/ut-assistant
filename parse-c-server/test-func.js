@@ -26,7 +26,10 @@ export async function findTestFunc(root_node) {
                 func.startPosition = lv_1.startPosition;
                 func.endPosition = lv_1.endPosition;
                 for (const lv_2 of lv_1.children) {
-                    if (lv_2.type == 'type_identifier') {
+                    if (lv_2.type == 'storage_class_specifier') {
+                        func.storage_class_specifier = lv_2.text;
+                    }
+                    else if (lv_2.type == 'type_identifier') {
                         func.type_identifier = lv_2.text;
                     }
                     else if (lv_2.type == 'primitive_type') {

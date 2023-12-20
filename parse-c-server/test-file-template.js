@@ -177,14 +177,28 @@ export async function generateTestCaseString(test_case_list, test_func_list, glo
     }
 }
 
-export async function generateExternTestFuncString(test_func_list) {
+export async function generateExternTestFuncString(test_func_list, module_name) {
     try {
         let insert_str = ''
         for (const func of test_func_list) {
-            if (func.primitive_type) {
-                insert_str += `\n extern "C" ${func.primitive_type} ${func.function_declarator};`
-            } else if (func.type_identifier) {
-                insert_str += `\n extern "C" ${func.type_identifier} ${func.function_declarator};`
+            /** */
+            /** global variable is static */
+            if (func.storage_class_specifier == 'static') {
+                if (func.primitive_type) {
+                    insert_str += `\n// Globalize(${module_name}, ${func.identifier});\nextern "C" ${func.primitive_type} ${func.function_declarator};`
+                }
+                if (func.type_identifier) {
+                    insert_str += `\n// Globalize(${module_name}, ${func.identifier});\nextern "C" ${func.type_identifier} ${func.function_declarator};`
+                }
+            }
+            /** global variable is NOT static */
+            else {
+                if (func.primitive_type) {
+                    insert_str += `\nextern "C" ${func.primitive_type} ${func.function_declarator};`
+                }
+                if (func.type_identifier) {
+                    insert_str += `\nextern "C" ${func.type_identifier} ${func.function_declarator};`
+                }
             }
         }
         return insert_str;
@@ -200,7 +214,7 @@ export async function generateExternGlobalVariableString(global_var_list, module
         for (const g_var of global_var_list) {
             /** */
             /** global variable is static */
-            if (g_var.storage_class_specifier) {
+            if (g_var.storage_class_specifier == 'static') {
                 if (g_var.primitive_type) {
                     insert_str += `\n// Globalize(${module_name}, ${g_var.identifier});\nextern ${g_var.primitive_type} `
                         + (g_var.array_declarator ? g_var.array_declarator : g_var.identifier) + `;`
