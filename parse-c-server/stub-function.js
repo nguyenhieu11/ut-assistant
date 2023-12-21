@@ -8,9 +8,9 @@ export async function getStubFunc(root_node) {
 
     // const stub_func_info_list = await getDataTypeOfStubFunc(root_node, assigned_stub_func_list, no_assigned_stub_func_list)
 
-    const data_type_assing = await getDataTypeOfAssignedStubFunc(root_node, assigned_stub_func_list);
+    const param_data_type_list = await getParamDataTypeOfStubFunc(root_node, assigned_stub_func_list, no_assigned_stub_func_list);
 
-    return { no_assigned_stub_func_list, assigned_stub_func_list, data_type_assing }
+    return { no_assigned_stub_func_list, assigned_stub_func_list }
 
 
     // let stub_func_info_list = []
@@ -121,7 +121,17 @@ export async function findAssignedStubFunc(root_node) {
                     if (lv_1.type == "assignment_expression") {
                         for (const lv_2 of lv_1.children) {
                             if (lv_2.type == "call_expression") {
+
                                 let stub_func = {}
+                                /** Start -  Get left side of assignment */
+                                for (const temp of lv_1.children) {
+                                    if (temp.type == "identifier") {
+                                        stub_func.assign_to = {}
+                                        stub_func.assign_to.identifier = temp.text
+                                    }
+                                }
+                                /** End - Get left side of assignment */
+
                                 stub_func.mark = lv_2.mark
                                 stub_func.startPosition = lv_2.startPosition
                                 stub_func.endPosition = lv_2.endPosition
@@ -184,9 +194,9 @@ export async function findAssignedStubFunc(root_node) {
     }
 }
 
-export async function getDataTypeOfAssignedStubFunc(root_node, assigned_stub_func_list) {
+export async function getParamDataTypeOfStubFunc(root_node, assigned_stub_func_list, no_assigned_stub_func_list) {
     try {
-        console.log("run getDataTypeOfAssignedStubFunc");
+        console.log("run getParamDataTypeOfStubFunc");
         let temp_root = lodash.clone(root_node);
         /** Try to re-mark the tree */
         if (!(await checkPreorder(temp_root))) {
@@ -194,8 +204,9 @@ export async function getDataTypeOfAssignedStubFunc(root_node, assigned_stub_fun
             temp_root = await markNumPreorderTree(temp_root, temp_root.mark);
         }
 
+        let all_stub_func_list = [...assigned_stub_func_list, ...no_assigned_stub_func_list]
         let return_data = []
-        for (const stub_func of assigned_stub_func_list) {
+        for (const stub_func of all_stub_func_list) {
             /** Get global function use this stub_func */
             let global_func = {};
             for (const lv_1 of temp_root.children) {
@@ -206,7 +217,7 @@ export async function getDataTypeOfAssignedStubFunc(root_node, assigned_stub_fun
                 }
             }
 
-            let local_var_data_type_list = []
+            let local_var_list = []
             async function getLocalDeclarationListRecursive(node) {
                 if (node.type == "declaration") {
                     let local_var_info = {}
@@ -222,7 +233,7 @@ export async function getDataTypeOfAssignedStubFunc(root_node, assigned_stub_fun
 
                             /** Save var */
                             let saved_var = lodash.clone(local_var_info);
-                            local_var_data_type_list.push(saved_var);
+                            local_var_list.push(saved_var);
                         }
                         else if (lv_1.type == "init_declarator") {
                             /** Not pointer */
@@ -236,7 +247,7 @@ export async function getDataTypeOfAssignedStubFunc(root_node, assigned_stub_fun
                                 }
                                 /** Save var */
                                 let saved_var = lodash.clone(local_var_info);
-                                local_var_data_type_list.push(saved_var);
+                                local_var_list.push(saved_var);
                             } else if (lv_1.children[0].type == "pointer_declarator") {
                                 local_var_info.pointer_declarator = lv_1.children[0].text
                                 local_var_info.value = lv_1.children[2].text
@@ -246,7 +257,7 @@ export async function getDataTypeOfAssignedStubFunc(root_node, assigned_stub_fun
                                         local_var_info.identifier = lv_2.text
                                         /** Save var */
                                         let saved_var = lodash.clone(local_var_info);
-                                        local_var_data_type_list.push(saved_var);
+                                        local_var_list.push(saved_var);
                                     }
                                 }
                             }
@@ -259,13 +270,12 @@ export async function getDataTypeOfAssignedStubFunc(root_node, assigned_stub_fun
                                     local_var_info.identifier = lv_2.text
                                     /** Save var */
                                     let saved_var = lodash.clone(local_var_info);
-                                    local_var_data_type_list.push(saved_var);
+                                    local_var_list.push(saved_var);
                                 }
                             }
                         }
                     }
-                    // local_var_data_type_list.push(local_var_info);
-
+                    // local_var_list.push(local_var_info);
                 }
                 if (node.childCount) {
                     for (let i = 0; i < node.childCount; i++) {
@@ -275,10 +285,167 @@ export async function getDataTypeOfAssignedStubFunc(root_node, assigned_stub_fun
             }
 
             await getLocalDeclarationListRecursive(global_func)
-            return_data.push({ ...stub_func, local_var_data_type_list })
+
+            /** For both assigned and no-assigned stub func */
+            for (const argm of stub_func.argument_list) {
+                for (const local_var of local_var_list) {
+                    if (argm.identifier == local_var.identifier) {
+                        if (local_var.primitive_type) {
+                            argm.primitive_type = local_var.primitive_type
+                        } else if (local_var.type_identifier) {
+                            argm.type_identifier = local_var.type_identifier
+                        }
+                        if (local_var.pointer_declarator) {
+                            argm.pointer_declarator = local_var.pointer_declarator
+                        }
+                    } else if (argm.pointer_expression == local_var.identifier) {
+                        if (local_var.primitive_type) {
+                            argm.primitive_type = local_var.primitive_type
+                        } else if (local_var.type_identifier) {
+                            argm.type_identifier = local_var.type_identifier
+                        }
+                        if (local_var.pointer_declarator) {
+                            argm.pointer_declarator = local_var.pointer_declarator
+                        }
+                    }
+                }
+            }
+
+            /** Only For Assigned stub func */
+            if (stub_func.assign_to?.identifier) {
+                for (const local_var of local_var_list) {
+                    if (stub_func.assign_to.identifier == local_var.identifier) {
+                        if (local_var.primitive_type) {
+                            stub_func.assign_to.data_type = local_var.primitive_type
+                        } else if (local_var.type_identifier) {
+                            stub_func.assign_to.data_type = local_var.type_identifier
+                        }
+                    }
+                }
+            }
+            /** Get parameter data type of function */
+            return_data.push({ ...stub_func, local_var_list })
         }
 
         return return_data
+    } catch (error) {
+        throw error;
+    }
+}
+
+export async function generateStubFuncDefineString(called_stub_func_list, module_name) {
+    try {
+        const { no_assigned_stub_func_list, assigned_stub_func_list } = called_stub_func_list
+
+        /** Create extern stub functions string */
+        let extern_str = `\nextern "C" {`
+        extern_str += `\n/** Function directly return void */`
+        for (const no_assigned_func of no_assigned_stub_func_list) {
+            extern_str += `\n\tvoid ${no_assigned_func.identifier}(`
+            for (const argm of no_assigned_func.argument_list) {
+                if (argm.identifier) {
+                    if (argm.primitive_type) {
+                        extern_str += ` ${argm.primitive_type} ${argm.identifier},`
+                    } else if (argm.type_identifier) {
+                        extern_str += ` ${argm.type_identifier} ${argm.identifier},`
+                    }
+                } else if (argm.pointer_expression) {
+                    if (argm.primitive_type) {
+                        extern_str += ` ${argm.primitive_type} *${argm.pointer_expression},`
+                    } else if (argm.type_identifier) {
+                        extern_str += ` ${argm.type_identifier} *${argm.pointer_expression},`
+                    }
+                }
+            }
+            extern_str = extern_str.slice(0, -1);
+            extern_str += `){}`
+        }
+        extern_str += `\n\n/** Stub function affect to code */`
+        for (const assigned_func of assigned_stub_func_list) {
+            extern_str += `\n\t${assigned_func.assign_to.data_type} ${assigned_func.identifier}(`
+            for (const argm of assigned_func.argument_list) {
+                if (argm.identifier) {
+                    if (argm.primitive_type) {
+                        extern_str += ` ${argm.primitive_type} ${argm.identifier},`
+                    } else if (argm.type_identifier) {
+                        extern_str += ` ${argm.type_identifier} ${argm.identifier},`
+                    }
+                } else if (argm.pointer_expression) {
+                    if (argm.primitive_type) {
+                        extern_str += ` ${argm.primitive_type} *${argm.pointer_expression},`
+                    } else if (argm.type_identifier) {
+                        extern_str += ` ${argm.type_identifier} *${argm.pointer_expression},`
+                    }
+                }
+            }
+            extern_str = extern_str.slice(0, -1);
+            extern_str += `);`
+        }
+        extern_str += `\n}`
+
+        /** Create MOCK stub functions string */
+        let mock_str = ''
+        for (const assigned_func of assigned_stub_func_list) {
+            mock_str += `\nMOCK_METHOD${assigned_func.argument_list.length}(${assigned_func.identifier}, ${assigned_func.assign_to?.data_type}(`
+            for (const argm of assigned_func.argument_list) {
+                if (argm.identifier) {
+                    if (argm.primitive_type) {
+                        mock_str += ` ${argm.primitive_type} ${argm.identifier},`
+                    } else if (argm.type_identifier) {
+                        mock_str += ` ${argm.type_identifier} ${argm.identifier},`
+                    }
+                } else if (argm.pointer_expression) {
+                    if (argm.primitive_type) {
+                        mock_str += ` ${argm.primitive_type} *${argm.pointer_expression},`
+                    } else if (argm.type_identifier) {
+                        mock_str += ` ${argm.type_identifier} *${argm.pointer_expression},`
+                    }
+                }
+            }
+            mock_str = mock_str.slice(0, -1);
+            mock_str += `));`;
+        }
+        mock_str += `\n`;
+
+        /** Create Define stub functions string */
+        let define_str = ''
+        for (const assigned_func of assigned_stub_func_list) {
+            define_str += `\n${assigned_func.assign_to?.data_type} ${assigned_func.identifier}(`
+            for (const argm of assigned_func.argument_list) {
+                if (argm.identifier) {
+                    if (argm.primitive_type) {
+                        define_str += ` ${argm.primitive_type} ${argm.identifier},`
+                    } else if (argm.type_identifier) {
+                        define_str += ` ${argm.type_identifier} ${argm.identifier},`
+                    }
+                } else if (argm.pointer_expression) {
+                    if (argm.primitive_type) {
+                        define_str += ` ${argm.primitive_type} *${argm.pointer_expression},`
+                    } else if (argm.type_identifier) {
+                        define_str += ` ${argm.type_identifier} *${argm.pointer_expression},`
+                    }
+                }
+            }
+            define_str = define_str.slice(0, -1);
+            define_str += `)`
+            define_str += `{\n\t`;
+            define_str += `return Stub::s_instance->${assigned_func.identifier}(`
+            for (const argm of assigned_func.argument_list) {
+                if (argm.identifier) {
+                    define_str += ` ${argm.identifier},`
+                } else if (argm.pointer_expression) {
+                    define_str += ` ${argm.pointer_expression},`
+                }
+            }
+            define_str = define_str.slice(0, -1);
+            define_str += `);`
+            define_str += `\n}`
+        }
+
+
+
+        return { extern_str, mock_str, define_str };
+
     } catch (error) {
         throw error;
     }

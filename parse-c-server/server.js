@@ -46,7 +46,7 @@ import { findTestFunc } from './test-func.js';
 import { generateExternGlobalVariableString, generateExternTestFuncString, generateTestCaseString } from './test-file-template.js';
 import { findGlobalVar } from './identifier-handle.js';
 import { insertToTestFile } from './testing-file-handle.js';
-import { getStubFunc } from './stub-function.js';
+import { generateStubFuncDefineString, getStubFunc } from './stub-function.js';
 
 // import {
 //     getTrustTable
@@ -353,8 +353,11 @@ app.get('/restructor-auto-generate', async (req, res) => {
         const extern_global_var_str = await generateExternGlobalVariableString(global_var_list, test_module_name);
 
         const called_stub_func_list = await getStubFunc(root_node);
-        // const final_content = await insertToTestFile(test_folder_path, test_module_name, test_case_str, extern_func_str, extern_global_var_str)
-        res.send(called_stub_func_list);
+
+        const stub_func_str = await generateStubFuncDefineString(called_stub_func_list);
+
+        const final_content = await insertToTestFile(test_folder_path, test_module_name, test_case_str, extern_func_str, extern_global_var_str, stub_func_str)
+        res.send(final_content);
         // res.send({ test_case_list, test_func_list, global_var_list, final_content });
         return;
     } catch (error) {
