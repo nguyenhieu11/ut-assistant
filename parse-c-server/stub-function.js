@@ -344,10 +344,19 @@ export async function generateStubFuncDefineString(called_stub_func_list, module
             extern_str += `\n\tvoid ${no_assigned_func.identifier}(`
             for (const argm of no_assigned_func.argument_list) {
                 if (argm.identifier) {
-                    if (argm.primitive_type) {
-                        extern_str += ` ${argm.primitive_type} ${argm.identifier},`
-                    } else if (argm.type_identifier) {
-                        extern_str += ` ${argm.type_identifier} ${argm.identifier},`
+                    if (argm.pointer_declarator) {
+                        if (argm.primitive_type) {
+                            extern_str += ` ${argm.primitive_type} *${argm.identifier},`
+                        } else if (argm.type_identifier) {
+                            extern_str += ` ${argm.type_identifier} *${argm.identifier},`
+                        }
+                    }
+                    else {
+                        if (argm.primitive_type) {
+                            extern_str += ` ${argm.primitive_type} ${argm.identifier},`
+                        } else if (argm.type_identifier) {
+                            extern_str += ` ${argm.type_identifier} ${argm.identifier},`
+                        }
                     }
                 } else if (argm.pointer_expression) {
                     if (argm.primitive_type) {
@@ -365,11 +374,23 @@ export async function generateStubFuncDefineString(called_stub_func_list, module
             extern_str += `\n\t${assigned_func.assign_to.data_type} ${assigned_func.identifier}(`
             for (const argm of assigned_func.argument_list) {
                 if (argm.identifier) {
-                    if (argm.primitive_type) {
-                        extern_str += ` ${argm.primitive_type} ${argm.identifier},`
-                    } else if (argm.type_identifier) {
-                        extern_str += ` ${argm.type_identifier} ${argm.identifier},`
+                    /** Pointer */
+                    if (argm.pointer_declarator) {
+                        if (argm.primitive_type) {
+                            extern_str += ` ${argm.primitive_type} *${argm.identifier},`
+                        } else if (argm.type_identifier) {
+                            extern_str += ` ${argm.type_identifier} *${argm.identifier},`
+                        }
                     }
+                    /** NOT pointer */
+                    else {
+                        if (argm.primitive_type) {
+                            extern_str += ` ${argm.primitive_type} ${argm.identifier},`
+                        } else if (argm.type_identifier) {
+                            extern_str += ` ${argm.type_identifier} ${argm.identifier},`
+                        }
+                    }
+
                 } else if (argm.pointer_expression) {
                     if (argm.primitive_type) {
                         extern_str += ` ${argm.primitive_type} *${argm.pointer_expression},`
@@ -389,10 +410,18 @@ export async function generateStubFuncDefineString(called_stub_func_list, module
             mock_str += `\nMOCK_METHOD${assigned_func.argument_list.length}(${assigned_func.identifier}, ${assigned_func.assign_to?.data_type}(`
             for (const argm of assigned_func.argument_list) {
                 if (argm.identifier) {
-                    if (argm.primitive_type) {
-                        mock_str += ` ${argm.primitive_type} ${argm.identifier},`
-                    } else if (argm.type_identifier) {
-                        mock_str += ` ${argm.type_identifier} ${argm.identifier},`
+                    if (argm.pointer_declarator) {
+                        if (argm.primitive_type) {
+                            mock_str += ` ${argm.primitive_type} *${argm.identifier},`
+                        } else if (argm.type_identifier) {
+                            mock_str += ` ${argm.type_identifier} *${argm.identifier},`
+                        }
+                    } else {
+                        if (argm.primitive_type) {
+                            mock_str += ` ${argm.primitive_type} ${argm.identifier},`
+                        } else if (argm.type_identifier) {
+                            mock_str += ` ${argm.type_identifier} ${argm.identifier},`
+                        }
                     }
                 } else if (argm.pointer_expression) {
                     if (argm.primitive_type) {
