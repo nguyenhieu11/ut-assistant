@@ -19,6 +19,10 @@ using ::testing::ReturnRef;
 
 //==================END_AUTO_EXTERN_FUNCTION==================//
 
+//==================BEGIN_AUTO_EXTERN_STUB_FUNCTION==================//
+
+//==================END_AUTO_EXTERN_STUB_FUNCTION==================//
+
 /* Extern variable */
 //==================BEGIN_AUTO_EXTERN_VARIABLE==================//
 
@@ -28,6 +32,9 @@ using ::testing::ReturnRef;
 class Stub
 {
 public:
+    //==================BEGIN_AUTO_MOCK_STUB_FUNCTION==================//
+
+    //==================END_AUTO_MOCK_STUB_FUNCTION==================//
     Stub()
     {
         s_instance = this;
@@ -36,6 +43,9 @@ public:
 };
 Stub *Stub::s_instance;
 
+//==================BEGIN_AUTO_DEFINE_STUB_FUNCTION==================//
+
+//==================END_AUTO_DEFINE_STUB_FUNCTION==================//
 namespace Test
 {
     class ClassUnitTest : public ::testing::Test
