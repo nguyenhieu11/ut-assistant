@@ -88,7 +88,7 @@ app.get('/get-ast', (req, res) => {
         const child_if_list = findIfCondition(e.node);
         let child_if_list_mark = []
         child_if_list.forEach(child => {
-            child_if_list_mark.push(child.mark)
+            child_if_list_mark.push(lodash.clone(child.mark))
         })
         let binary_expression_list = findBinaryExpression(e.node)
         let valid_binary_expression_list = []
@@ -110,7 +110,7 @@ app.get('/get-ast', (req, res) => {
                         }
                     })
                     if (!existed_be) {
-                        valid_binary_expression_list.push(be)
+                        valid_binary_expression_list.push(lodash.clone(be))
                     }
                 }
             }
@@ -124,7 +124,7 @@ app.get('/get-ast', (req, res) => {
         /** Delete .node inside info */
         // delete info.node;
 
-        if_list_info.push({
+        if_list_info.push(lodash.clone({
             par_mark: e.node.par_mark,
             mark: e.node.mark,
             info,
@@ -132,7 +132,7 @@ app.get('/get-ast', (req, res) => {
             // binary_expression_list,
             valid_binary_expression_list,
             identifier_list,
-        })
+        }))
     })
 
     const test_case_list = getTestCaseList(if_list_info);
@@ -175,7 +175,7 @@ app.get('/auto-generate', (req, res) => {
         const child_if_list = findIfCondition(e.node);
         let child_if_list_mark = []
         child_if_list.forEach(child => {
-            child_if_list_mark.push(child.mark)
+            child_if_list_mark.push(lodash.clone(child.mark))
         })
         let binary_expression_list = findBinaryExpression(e.node)
         let valid_binary_expression_list = []
@@ -197,7 +197,7 @@ app.get('/auto-generate', (req, res) => {
                         }
                     })
                     if (!existed_be) {
-                        valid_binary_expression_list.push(be)
+                        valid_binary_expression_list.push(lodash.clone(be))
                     }
                 }
             }
@@ -211,7 +211,7 @@ app.get('/auto-generate', (req, res) => {
         /** Delete .node inside info */
         // delete info.node;
 
-        if_list_info.push({
+        if_list_info.push(lodash.clone({
             par_mark: e.node.par_mark,
             mark: e.node.mark,
             info,
@@ -219,7 +219,7 @@ app.get('/auto-generate', (req, res) => {
             // binary_expression_list,
             valid_binary_expression_list,
             identifier_list,
-        })
+        }))
     })
 
     /** Need fix: test_case_list is array in array*/

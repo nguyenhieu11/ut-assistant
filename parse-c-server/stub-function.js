@@ -16,7 +16,7 @@ export async function getStubFunc(root_node) {
     // let stub_func_info_list = []
     // for (const stub of called_stub_func_list) {
     //     const stub_info = await analyzeStubFunc(stub);
-    //     stub_func_info_list.push(stub_info);
+    //     stub_func_info_list.push(lodash.clone(stub_info));
     // }
     // return stub_func_info_list;
 
@@ -54,7 +54,7 @@ export async function findNoAssignedStubFunc(root_node) {
                                         let arg_info = {}
                                         arg_info.type = "identifier"
                                         arg_info.identifier = lv_3.text;
-                                        stub_func.argument_list.push(arg_info)
+                                        stub_func.argument_list.push(lodash.clone(arg_info))
                                     } else if (lv_3.type == "pointer_expression") {
                                         let arg_info = {}
                                         arg_info.type = "pointer_expression"
@@ -63,13 +63,13 @@ export async function findNoAssignedStubFunc(root_node) {
                                                 arg_info.pointer_expression = lv_4.text;
                                             }
                                         }
-                                        stub_func.argument_list.push(arg_info)
+                                        stub_func.argument_list.push(lodash.clone(arg_info))
                                     }
                                 }
                             }
                         }
 
-                        no_assigned_stub_func_list.push(stub_func);
+                        no_assigned_stub_func_list.push(lodash.clone(stub_func));
                     }
                 }
 
@@ -93,7 +93,7 @@ export async function findNoAssignedStubFunc(root_node) {
                 }
             }
             if (is_unique) {
-                unique_no_assigned_stub_func_list.push(e);
+                unique_no_assigned_stub_func_list.push(lodash.clone(e));
             }
         })
         return unique_no_assigned_stub_func_list;
@@ -146,7 +146,7 @@ export async function findAssignedStubFunc(root_node) {
                                                 let arg_info = {}
                                                 arg_info.type = "identifier"
                                                 arg_info.identifier = lv_4.text;
-                                                stub_func.argument_list.push(arg_info)
+                                                stub_func.argument_list.push(lodash.clone(arg_info))
                                             } else if (lv_4.type == "pointer_expression") {
                                                 let arg_info = {}
                                                 arg_info.type = "pointer_expression"
@@ -155,12 +155,12 @@ export async function findAssignedStubFunc(root_node) {
                                                         arg_info.pointer_expression = lv_5.text;
                                                     }
                                                 }
-                                                stub_func.argument_list.push(arg_info)
+                                                stub_func.argument_list.push(lodash.clone(arg_info))
                                             }
                                         }
                                     }
                                 }
-                                assigned_stub_func_list.push(stub_func);
+                                assigned_stub_func_list.push(lodash.clone(stub_func));
                             }
                         }
                     }
@@ -185,7 +185,7 @@ export async function findAssignedStubFunc(root_node) {
                 }
             }
             if (is_unique) {
-                unique_assigned_stub_func_list.push(e);
+                unique_assigned_stub_func_list.push(lodash.clone(e));
             }
         })
         return unique_assigned_stub_func_list;
@@ -233,7 +233,7 @@ export async function getParamDataTypeOfStubFunc(root_node, assigned_stub_func_l
 
                             /** Save var */
                             let saved_var = lodash.clone(local_var_info);
-                            local_var_list.push(saved_var);
+                            local_var_list.push(lodash.clone(saved_var));
                         }
                         else if (lv_1.type == "init_declarator") {
                             /** Not pointer */
@@ -247,7 +247,7 @@ export async function getParamDataTypeOfStubFunc(root_node, assigned_stub_func_l
                                 }
                                 /** Save var */
                                 let saved_var = lodash.clone(local_var_info);
-                                local_var_list.push(saved_var);
+                                local_var_list.push(lodash.clone(saved_var));
                             } else if (lv_1.children[0].type == "pointer_declarator") {
                                 local_var_info.pointer_declarator = lv_1.children[0].text
                                 local_var_info.value = lv_1.children[2].text
@@ -257,7 +257,7 @@ export async function getParamDataTypeOfStubFunc(root_node, assigned_stub_func_l
                                         local_var_info.identifier = lv_2.text
                                         /** Save var */
                                         let saved_var = lodash.clone(local_var_info);
-                                        local_var_list.push(saved_var);
+                                        local_var_list.push(lodash.clone(saved_var));
                                     }
                                 }
                             }
@@ -270,12 +270,12 @@ export async function getParamDataTypeOfStubFunc(root_node, assigned_stub_func_l
                                     local_var_info.identifier = lv_2.text
                                     /** Save var */
                                     let saved_var = lodash.clone(local_var_info);
-                                    local_var_list.push(saved_var);
+                                    local_var_list.push(lodash.clone(saved_var));
                                 }
                             }
                         }
                     }
-                    // local_var_list.push(local_var_info);
+                    // local_var_list.push(lodash.clone(local_var_info);
                 }
                 if (node.childCount) {
                     for (let i = 0; i < node.childCount; i++) {
@@ -324,7 +324,7 @@ export async function getParamDataTypeOfStubFunc(root_node, assigned_stub_func_l
                 }
             }
             /** Get parameter data type of function */
-            return_data.push({ ...stub_func, local_var_list })
+            return_data.push(lodash.clone({ ...stub_func, local_var_list }))
         }
 
         return return_data

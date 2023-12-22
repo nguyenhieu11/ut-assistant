@@ -12,8 +12,8 @@ import lodash from 'lodash';
 //     let preorder = [];
 //     console.log("==== begin preorder")
 //     console.log(preorder)
-//     preorder.push(root.mark);
-//     stack.push(root);
+//     preorder.push(lodash.clone(root.mark));
+//     stack.push(lodash.clone(root))
 
 //     while (stack.length > 0) {
 //         // 'flag' checks whether all the child
@@ -36,8 +36,8 @@ import lodash from 'lodash';
 //             for (let i = 0; i < par.children.length; i++) {
 //                 if (!preorder.includes(par.children[i].mark)) {
 //                     flag = 1;
-//                     stack.push(par.children[i]);
-//                     preorder.push(par.children[i].mark);
+//                     stack.push(lodash.clone(par.children[i]);
+//                     preorder.push(lodash.clone(par.children[i].mark);
 //                     break;
 //                 }
 //                 // b)If all Child nodes from left to right
@@ -63,8 +63,8 @@ export async function preorderTraversal(root) {
     // 'Preorder'-> contains all the
     // visited nodes.
     let preorder = [];
-    preorder.push(root.mark);
-    stack.push(root);
+    preorder.push(lodash.clone(root.mark));
+    stack.push(lodash.clone(root));
     while (stack.length > 0) {
         // 'flag' checks whether all the child
         // nodes have been visited.
@@ -86,8 +86,8 @@ export async function preorderTraversal(root) {
             for (let i = 0; i < par.children.length; i++) {
                 if (!preorder.includes(par.children[i].mark)) {
                     flag = 1;
-                    stack.push(par.children[i]);
-                    preorder.push(par.children[i].mark);
+                    stack.push(lodash.clone(par.children[i]));
+                    preorder.push(lodash.clone(par.children[i].mark));
                     break;
                 }
                 // b)If all Child nodes from left to right
@@ -111,8 +111,8 @@ export async function preorderTraversal(root) {
 //     // visited nodes.
 //     let if_list = [];
 //     let preorder = [];
-//     preorder.push(root.mark);
-//     stack.push(root);
+//     preorder.push(lodash.clone(root.mark);
+//     stack.push(lodash.clone(root);
 //     while (stack.length > 0) {
 //         // 'flag' checks whether all the child
 //         // nodes have been visited.
@@ -134,12 +134,12 @@ export async function preorderTraversal(root) {
 //             for (let i = 0; i < par.children.length; i++) {
 //                 if (!preorder.includes(par.children[i].mark)) {
 //                     flag = 1;
-//                     stack.push(par.children[i]);
-//                     preorder.push(par.children[i].mark);
+//                     stack.push(lodash.clone(par.children[i]);
+//                     preorder.push(lodash.clone(par.children[i].mark);
 
 //                     let node = par.children[i];
 //                     if (node.type == 'if_statement') {
-//                         if_list.push({
+//                         if_list.push(lodash.clone({
 //                             node,
 //                             // par_mark: par.mark,
 //                             mark: node.mark
@@ -193,8 +193,8 @@ export function findBinaryExpression(root) {
     // visited nodes.
     let binary_expression_list = [];
     let preorder = [];
-    preorder.push(root.mark);
-    stack.push(root);
+    preorder.push(lodash.clone(root.mark));
+    stack.push(lodash.clone(root));
 
 
     while (stack.length > 0) {
@@ -218,12 +218,12 @@ export function findBinaryExpression(root) {
             for (let i = 0; i < par.children.length; i++) {
                 if (!preorder.includes(par.children[i].mark)) {
                     flag = 1;
-                    stack.push(par.children[i]);
-                    preorder.push(par.children[i].mark);
+                    stack.push(lodash.clone(par.children[i]));
+                    preorder.push(lodash.clone(par.children[i].mark));
 
                     let node = par.children[i];
                     if (node.type == 'binary_expression') {
-                        // binary_expression_list.push({
+                        // binary_expression_list.push(lodash.clone({
                         //     node,
                         //     mark: node.mark
                         // })
@@ -238,7 +238,7 @@ export function findBinaryExpression(root) {
 
                         }
                         if (isLowestLevel) {
-                            binary_expression_list.push({
+                            binary_expression_list.push(lodash.clone({
                                 // node,
                                 // par_mark: par.mark,
                                 mark: node.mark,
@@ -246,7 +246,7 @@ export function findBinaryExpression(root) {
                                 endPosition: node.endPosition,
                                 binary_expression: node.text,
                                 node
-                            })
+                            }))
                         }
 
                     }
@@ -275,8 +275,8 @@ export function findIdentifier(root) {
     // visited nodes.
     let identifier_list = [];
     let preorder = [];
-    preorder.push(root.mark);
-    stack.push(root);
+    preorder.push(lodash.clone(root.mark));
+    stack.push(lodash.clone(root));
 
 
     while (stack.length > 0) {
@@ -300,16 +300,16 @@ export function findIdentifier(root) {
             for (let i = 0; i < par.children.length; i++) {
                 if (!preorder.includes(par.children[i].mark)) {
                     flag = 1;
-                    stack.push(par.children[i]);
-                    preorder.push(par.children[i].mark);
+                    stack.push(lodash.clone(par.children[i]));
+                    preorder.push(lodash.clone(par.children[i].mark));
 
                     let node = par.children[i];
                     if (node.type == 'identifier') {
-                        // identifier_list.push({
+                        // identifier_list.push(lodash.clone({
                         //     node,
                         //     mark: node.mark
                         // })
-                        identifier_list.push({
+                        identifier_list.push(lodash.clone({
                             // node,
                             // par_mark: par.mark,
                             mark: node.mark,
@@ -317,7 +317,7 @@ export function findIdentifier(root) {
                             endPosition: node.endPosition,
                             identifier: node.text,
                             node
-                        })
+                        }))
                     }
                     break;
                 }
@@ -343,10 +343,10 @@ export async function checkPreorder(root_node) {
         let res_ok = true;
         // Declare recursive function
         async function checkPreorderRecursive(node) {
-            check_preorder.push({
+            check_preorder.push(lodash.clone({
                 mark: node.mark ? node.mark : null,
                 text: node.text ? node.text : null
-            });
+            }));
             if (node.childCount) {
                 for (let i = 0; i < node.childCount; i++) {
                     await checkPreorderRecursive(node.children[i]);
@@ -428,7 +428,7 @@ export async function markNumPreorderTree(root_node, start_num) {
 //         }
 //     })
 //     if (res_ok) {
-//         dbg_arr.push(preorder)
+//         dbg_arr.push(lodash.clone(preorder))
 //         console.log(`check preorder OK with try times: ${i + 1}`)
 //     }
 // }

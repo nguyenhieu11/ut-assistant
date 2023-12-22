@@ -59,8 +59,8 @@ export async function findTestFunc(root_node) {
                                                 param.pointer_declarator = lv_5.text
                                             }
                                         }
-                                        declarator_list.push(param)
-                                        // declarator_list.push(lv_4.text);
+                                        declarator_list.push(lodash.clone(param))
+                                        // declarator_list.push(lodash.clone(lv_4.text);
                                     }
                                 }
                                 func.declarator_list = declarator_list;
@@ -68,7 +68,7 @@ export async function findTestFunc(root_node) {
                         }
                     }
                 }
-                test_func_list.push(func);
+                test_func_list.push(lodash.clone(func));
             }
         }
 

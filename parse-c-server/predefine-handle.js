@@ -29,7 +29,7 @@ export async function findPreProcDefine(root_node) {
                         preproc.preproc_arg = node.children[i].text
                     }
                 }
-                preproc_list.push(preproc)
+                preproc_list.push(lodash.clone(preproc))
             }
             if (node.childCount) {
                 for (let i = 0; i < node.childCount; i++) {
@@ -74,7 +74,7 @@ export async function findEnumerator(root_node) {
                         preproc.number_literal = node.children[i].text
                     }
                 }
-                enumerator_list.push(preproc)
+                enumerator_list.push(lodash.clone(preproc))
             }
             if (node.childCount) {
                 for (let i = 0; i < node.childCount; i++) {

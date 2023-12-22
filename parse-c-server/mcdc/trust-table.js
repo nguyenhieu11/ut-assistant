@@ -1,3 +1,4 @@
+import lodash from 'lodash';
 
 function calc(a1, a2, a3, a4, a5, a6) {
     return (a1 || (a2 && a3) || (a2 && a4) || a5 || a6);
@@ -19,7 +20,7 @@ export function getTrustTable() {
             a1, a2, a3, a4, a5, a6,
             result
         }
-        trust_table.push(element);
+        trust_table.push(lodash.clone(element));
     }
     return trust_table;
 }

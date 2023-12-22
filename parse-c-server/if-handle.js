@@ -20,10 +20,10 @@ export async function findIfCondition(root_node) {
         /** Declare mark num of tree with preorder */
         async function findIfRecursive(node) {
             if (node.type == "if_statement") {
-                if_list.push({
+                if_list.push(lodash.clone({
                     node: node,
                     mark: node.mark ? node.mark : null
-                })
+                }))
             }
             if (node.childCount) {
                 for (let i = 0; i < node.childCount; i++) {
@@ -66,10 +66,10 @@ export async function findChildIfCondition(root_node) {
                             }
                         })
                         if (!is_existed) {
-                            child_if_list.push({
+                            child_if_list.push(lodash.clone({
                                 node: node.children[i],
                                 mark: node.children[i].mark ? node.children[i].mark : null
-                            })
+                            }))
                         }
 
                     }
@@ -114,7 +114,7 @@ export async function findBinaryExpression(root_node) {
 
                 }
                 if (is_lowest_level) {
-                    binary_expression_list.push({
+                    binary_expression_list.push(lodash.clone({
                         // node,
                         // par_mark: par.mark,
                         mark: node.mark ? node.mark : null,
@@ -122,7 +122,7 @@ export async function findBinaryExpression(root_node) {
                         endPosition: node.endPosition,
                         binary_expression: node.text,
                         node
-                    })
+                    }))
                 }
             }
             if (node.childCount) {
@@ -178,7 +178,7 @@ export async function getIfInfoList(if_list) {
 
             let child_if_list_mark = []
             child_if_list.forEach(child => {
-                child_if_list_mark.push(child.mark)
+                child_if_list_mark.push(lodash.clone(child.mark))
             })
 
             let valid_binary_expression_list = []
@@ -200,7 +200,7 @@ export async function getIfInfoList(if_list) {
                             }
                         })
                         if (!existed_be) {
-                            valid_binary_expression_list.push(be)
+                            valid_binary_expression_list.push(lodash.clone(be))
                         }
                     }
                 }
@@ -208,7 +208,7 @@ export async function getIfInfoList(if_list) {
                     valid_binary_expression_list = binary_expression_list
                 }
             })
-            if_info_list.push({
+            if_info_list.push(lodash.clone({
                 par_mark: e.node.par_mark,
                 mark: e.node.mark,
                 info,
@@ -216,7 +216,7 @@ export async function getIfInfoList(if_list) {
                 // binary_expression_list,
                 valid_binary_expression_list,
                 identifier_list,
-            })
+            }))
 
         }
         // console.log('if_info_list ======================');

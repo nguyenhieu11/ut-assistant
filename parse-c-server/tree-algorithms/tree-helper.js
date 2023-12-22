@@ -1,3 +1,4 @@
+import lodash from 'lodash';
 
 export function isInsideNode(node, target_mark) {
 
@@ -28,8 +29,8 @@ export function getNodeType(root, target_type) {
 
     let stack = [];
     let preorder = [];
-    preorder.push(root.mark);
-    stack.push(root);
+    preorder.push(lodash.clone(root.mark));
+    stack.push(lodash.clone(root));
 
     while (stack.length > 0) {
         // 'flag' checks whether all the child
@@ -52,16 +53,16 @@ export function getNodeType(root, target_type) {
             for (let i = 0; i < par.children.length; i++) {
                 if (!preorder.includes(par.children[i].mark)) {
                     flag = 1;
-                    stack.push(par.children[i]);
-                    preorder.push(par.children[i].mark);
+                    stack.push(lodash.clone(par.children[i]));
+                    preorder.push(lodash.clone(par.children[i].mark));
 
                     let node = par.children[i];
                     if (node.type == target_type) {
-                        target_list.push({
+                        target_list.push(lodash.clone({
                             node,
                             // par_mark: par.mark,
                             mark: node.mark
-                        })
+                        }))
                     }
                     break;
 

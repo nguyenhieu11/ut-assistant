@@ -1,4 +1,5 @@
 import { isInsideNode, getNodeType } from "./tree-algorithms/tree-helper.js";
+import lodash from 'lodash';
 
 export function getCalledStubFunc(root_node, if_list, test_case_list) {
 
@@ -41,7 +42,7 @@ export function getCalledStubFunc(root_node, if_list, test_case_list) {
                                     func_info.mark = ce.mark
                                 }
                             })
-                            inside_func_call_list.push(func_info);
+                            inside_func_call_list.push(lodash.clone(func_info));
                         }
                     }
 
@@ -82,7 +83,7 @@ export function getCalledStubFunc(root_node, if_list, test_case_list) {
     //                     func_name: func_name,
     //                     mark: ce.mark
     //                 }
-    //                 outside_func_call_list.push(func_info);
+    //                 outside_func_call_list.push(lodash.clone(func_info));
     //             }
     //         }
     //     })

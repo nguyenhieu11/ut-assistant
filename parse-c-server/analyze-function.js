@@ -1,4 +1,4 @@
-
+import lodash from 'lodash';
 
 export function getFuncReturnType(func_node) {
     const func_def = func_node.children[0];
@@ -85,7 +85,7 @@ export function getFuncParamList(func_node) {
                     param_prop.identifier = param.children[j].text;
                 }
             }
-            return_param_list.push(param_prop)
+            return_param_list.push(lodash.clone(param_prop))
         }
     }
 
@@ -110,7 +110,7 @@ export function getFuncLocalVarList(func_node) {
     let declaration_list = [];
     for (let i = 0; i < func_compound_statement.children.length; i++) {
         if (func_compound_statement.children[i].type == "declaration") {
-            declaration_list.push(func_compound_statement.children[i]);
+            declaration_list.push(lodash.clone(func_compound_statement.children[i]));
         }
     }
     if (!declaration_list.length) {
@@ -144,7 +144,7 @@ export function getFuncLocalVarList(func_node) {
                 }
             }
         }
-        func_local_var_list.push(var_prop);
+        func_local_var_list.push(lodash.clone(var_prop));
     })
 
     return func_local_var_list;

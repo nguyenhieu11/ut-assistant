@@ -17,13 +17,13 @@ export async function findIdentifier(root_node) {
         /** Declare mark num of tree with preorder */
         async function findIdentifierRecursive(node) {
             if (node.type == "identifier") {
-                identifier_list.push({
+                identifier_list.push(lodash.clone({
                     mark: node.mark ? node.mark : null,
                     startPosition: node.startPosition,
                     endPosition: node.endPosition,
                     identifier: node.text,
                     node
-                })
+                }))
             }
             if (node.childCount) {
                 for (let i = 0; i < node.childCount; i++) {
@@ -109,7 +109,7 @@ export async function findGlobalVar(root_node) {
                         }
                     }
                 }
-                global_var_list.push(global_var);
+                global_var_list.push(lodash.clone(global_var));
             }
         }
 

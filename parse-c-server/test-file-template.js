@@ -75,7 +75,7 @@ export async function generateTestCaseString(test_case_list, test_func_list, glo
                             // console.log(as)
                             // console.log('expected_global_var')
                             // console.log(expected_global_var)
-                            expected_global_var_list.push(expected_global_var);
+                            expected_global_var_list.push(lodash.clone(expected_global_var));
                         }
                     }
                 })
