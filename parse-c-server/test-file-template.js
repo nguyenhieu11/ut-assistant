@@ -3,7 +3,7 @@ import lodash from 'lodash';
 import { markNumPreorderTree, checkPreorder } from './preorder-traversal.js';
 import { findIdentifier } from './identifier-handle.js';
 
-export async function generateTestCaseString(test_case_list, test_func_list, global_var_list) {
+export async function generateTestCaseString(test_case_list, global_func_list, global_var_list) {
     try {
         let insert_str = ''
         for (const tc_group of test_case_list) {
@@ -30,7 +30,7 @@ export async function generateTestCaseString(test_case_list, test_func_list, glo
                         }
                         /** check with parameter_list */
                         if (!get_type_ok) {
-                            test_func_list.forEach(func => {
+                            global_func_list.forEach(func => {
                                 if (tc.startPosition.row >= func.startPosition.row && tc.endPosition.row <= func.endPosition.row) {
                                     for (const decl of func.declarator_list) {
                                         if (decl.identifier && decl.identifier == as.identifier) {
@@ -75,7 +75,7 @@ export async function generateTestCaseString(test_case_list, test_func_list, glo
                             // console.log(as)
                             // console.log('expected_global_var')
                             // console.log(expected_global_var)
-                            expected_global_var_list.push(expected_global_var);
+                            expected_global_var_list.push(lodash.clone(expected_global_var));
                         }
                     }
                 })
@@ -99,18 +99,18 @@ export async function generateTestCaseString(test_case_list, test_func_list, glo
                 let declaration_of_func_str = ''
                 let param_of_func_str = ''
                 let expected_return_of_func = {}
-                test_func_list.forEach(func => {
+                global_func_list.forEach(func => {
                     if (tc.startPosition.row >= func.startPosition.row && tc.endPosition.row <= func.endPosition.row) {
                         func_name_str = func.identifier;
                         /** Get expected info of function */
                         if (func.primitive_type && func.primitive_type !== 'void') {
                             expected_return_of_func.declaration_str = `${func.primitive_type} expected_returnValue;`
                             expected_return_of_func.return_str = 'expected_returnValue = ';
-                            expected_return_of_func.check_eq_str = 'EXPETED_EQ(expected_returnValue, 0);'
+                            expected_return_of_func.check_eq_str = 'EXPECTED_EQ(expected_returnValue, 0);'
                         } else if (func.type_identifier) {
                             expected_return_of_func.declaration_str = `${func.type_identifier} expected_returnValue;`
                             expected_return_of_func.return_str = 'expected_returnValue = ';
-                            expected_return_of_func.check_eq_str = 'EXPETED_EQ(expected_returnValue, 0);'
+                            expected_return_of_func.check_eq_str = 'EXPECTED_EQ(expected_returnValue, 0);'
                         } else {
                             expected_return_of_func.declaration_str = ''
                             expected_return_of_func.return_str = ''
@@ -177,14 +177,28 @@ export async function generateTestCaseString(test_case_list, test_func_list, glo
     }
 }
 
-export async function generateExternTestFuncString(test_func_list) {
+export async function generateExternGlobalFuncString(global_func_list, module_name) {
     try {
         let insert_str = ''
-        for (const func of test_func_list) {
-            if (func.primitive_type) {
-                insert_str += `\n extern "C" ${func.primitive_type} ${func.function_declarator};`
-            } else if (func.type_identifier) {
-                insert_str += `\n extern "C" ${func.type_identifier} ${func.function_declarator};`
+        for (const func of global_func_list) {
+            /** */
+            /** global variable is static */
+            if (func.storage_class_specifier == 'static') {
+                if (func.primitive_type) {
+                    insert_str += `\n// Globalize(${module_name}, ${func.identifier});\nextern "C" ${func.primitive_type} ${func.function_declarator};`
+                }
+                if (func.type_identifier) {
+                    insert_str += `\n// Globalize(${module_name}, ${func.identifier});\nextern "C" ${func.type_identifier} ${func.function_declarator};`
+                }
+            }
+            /** global variable is NOT static */
+            else {
+                if (func.primitive_type) {
+                    insert_str += `\nextern "C" ${func.primitive_type} ${func.function_declarator};`
+                }
+                if (func.type_identifier) {
+                    insert_str += `\nextern "C" ${func.type_identifier} ${func.function_declarator};`
+                }
             }
         }
         return insert_str;
@@ -194,14 +208,32 @@ export async function generateExternTestFuncString(test_func_list) {
     }
 }
 
-export async function generateExternGlobalVariableString(global_var_list) {
+export async function generateExternGlobalVariableString(global_var_list, module_name) {
     try {
         let insert_str = ''
         for (const g_var of global_var_list) {
-            if (g_var.primitive_type) {
-                insert_str += `\n extern ${g_var.primitive_type} ${g_var.identifier};`
-            } else if (g_var.type_identifier) {
-                insert_str += `\n extern ${g_var.type_identifier} ${g_var.identifier};`
+            /** */
+            /** global variable is static */
+            if (g_var.storage_class_specifier == 'static') {
+                if (g_var.primitive_type) {
+                    insert_str += `\n// Globalize(${module_name}, ${g_var.identifier});\nextern ${g_var.primitive_type} `
+                        + (g_var.array_declarator ? g_var.array_declarator : g_var.identifier) + `;`
+                }
+                if (g_var.type_identifier) {
+                    insert_str += `\n// Globalize(${module_name}, ${g_var.identifier});\nextern ${g_var.type_identifier}  `
+                        + (g_var.array_declarator ? g_var.array_declarator : g_var.identifier) + `;`
+                }
+            }
+            /** global variable is NOT static */
+            else {
+                if (g_var.primitive_type) {
+                    insert_str += `\nextern ${g_var.primitive_type} `
+                        + (g_var.array_declarator ? g_var.array_declarator : g_var.identifier) + `;`
+                }
+                if (g_var.type_identifier) {
+                    insert_str += `\nextern ${g_var.type_identifier} `
+                        + (g_var.array_declarator ? g_var.array_declarator : g_var.identifier) + `;`
+                }
             }
         }
         return insert_str;

@@ -1,5 +1,6 @@
 
 
+import lodash from 'lodash';
 
 /** IDENTIFIER AS VALUE */
 const IDENTIFIER_AS_VALUE = [
@@ -10,7 +11,7 @@ export function getTestCaseList(if_list_info, preproc_list, enumerator_list) {
     let all_test_case = []
     if_list_info.forEach(ili => {
         let ts_each_condition = parseTestCase(ili, preproc_list, enumerator_list)
-        all_test_case.push(ts_each_condition);
+        all_test_case.push(lodash.clone(ts_each_condition));
     });
     return all_test_case
 }
@@ -36,7 +37,7 @@ function parseTestCase(condition_info, preproc_list, enumerator_list) {
         ) {
             i_replace++;
             vbe.i_replace = i_replace;
-            replace_list.push(vbe);
+            replace_list.push(lodash.clone(vbe));
         }
     })
     condition.identifier_list.forEach(iden => {
@@ -59,7 +60,7 @@ function parseTestCase(condition_info, preproc_list, enumerator_list) {
             if (!is_contained_in_condition) {
                 i_replace++;
                 iden.i_replace = i_replace;
-                replace_list.push(iden);
+                replace_list.push(lodash.clone(iden));
             }
         }
     })
@@ -312,7 +313,7 @@ function getMcdcTable(condition, preproc_list, enumerator_list) {
         obj_key.forEach(obk => {
             if (obk.includes('var_')) {
                 let character = obk.replace('var_', '');
-                character_list.push(character);
+                character_list.push(lodash.clone(character));
             }
         })
         // test_case.character_list = character_list
@@ -326,7 +327,7 @@ function getMcdcTable(condition, preproc_list, enumerator_list) {
                 }
             })
             rp_condition.value = tr[`var_${chr}`]
-            rp_condition_list.push(rp_condition)
+            rp_condition_list.push(lodash.clone(rp_condition))
         })
         // test_case.rp_condition_list = rp_condition_list
 
@@ -346,11 +347,11 @@ function getMcdcTable(condition, preproc_list, enumerator_list) {
             /** Get character and condition result for generate description step */
             assign.character = cond.character
             assign.conditon_value = cond.value
-            assign_list.push(assign)
+            assign_list.push(lodash.clone(assign))
         })
         test_case.assign_list = assign_list
         /** Push test case to array */
-        test_case_list.push(test_case)
+        test_case_list.push(lodash.clone(test_case))
 
         /** Generate test case description*/
         test_case_list.forEach(ts => {

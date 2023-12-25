@@ -6,7 +6,7 @@ import { findIdentifier } from './identifier-handle.js';
 
 export async function findIfCondition(root_node) {
     try {
-        // console.log("run findIfCondition");
+        console.log("run findIfCondition");
         let temp_root = lodash.clone(root_node);
         /** Try to re-mark the tree */
         if (!(await checkPreorder(temp_root))) {
@@ -20,13 +20,13 @@ export async function findIfCondition(root_node) {
         /** Declare mark num of tree with preorder */
         async function findIfRecursive(node) {
             if (node.type == "if_statement") {
-                if_list.push({
+                if_list.push(lodash.clone({
                     node: node,
                     mark: node.mark ? node.mark : null
-                })
+                }))
             }
-            if (node.childCount) {
-                for (let i = 0; i < node.childCount; i++) {
+            if (node.children.length) {
+                for (let i = 0; i < node.children.length; i++) {
                     await findIfRecursive(node.children[i]);
                 }
             }
@@ -43,7 +43,7 @@ export async function findIfCondition(root_node) {
 
 export async function findChildIfCondition(root_node) {
     try {
-        // console.log("run findChildIfCondition");
+        console.log("run findChildIfCondition");
         let temp_root = lodash.clone(root_node);
         /** Try to re-mark the tree */
         if (!(await checkPreorder(temp_root))) {
@@ -55,8 +55,8 @@ export async function findChildIfCondition(root_node) {
         let child_if_list = [];
         /** Declare mark num of tree with preorder */
         async function findChildIfRecursive(node) {
-            if (node.childCount) {
-                for (let i = 0; i < node.childCount; i++) {
+            if (node.children.length) {
+                for (let i = 0; i < node.children.length; i++) {
                     if (node.children[i].type == "if_statement") {
                         /** Only push NOT existed node */
                         let is_existed = false;
@@ -66,10 +66,10 @@ export async function findChildIfCondition(root_node) {
                             }
                         })
                         if (!is_existed) {
-                            child_if_list.push({
+                            child_if_list.push(lodash.clone({
                                 node: node.children[i],
                                 mark: node.children[i].mark ? node.children[i].mark : null
-                            })
+                            }))
                         }
 
                     }
@@ -90,7 +90,7 @@ export async function findChildIfCondition(root_node) {
 export async function findBinaryExpression(root_node) {
 
     try {
-        // console.log("run findBinaryExpression");
+        console.log("run findBinaryExpression");
         let temp_root = lodash.clone(root_node);
         /** Try to re-mark the tree */
         if (!(await checkPreorder(temp_root))) {
@@ -114,7 +114,7 @@ export async function findBinaryExpression(root_node) {
 
                 }
                 if (is_lowest_level) {
-                    binary_expression_list.push({
+                    binary_expression_list.push(lodash.clone({
                         // node,
                         // par_mark: par.mark,
                         mark: node.mark ? node.mark : null,
@@ -122,11 +122,11 @@ export async function findBinaryExpression(root_node) {
                         endPosition: node.endPosition,
                         binary_expression: node.text,
                         node
-                    })
+                    }))
                 }
             }
-            if (node.childCount) {
-                for (let i = 0; i < node.childCount; i++) {
+            if (node.children.length) {
+                for (let i = 0; i < node.children.length; i++) {
                     await findBinaryExpressionRecursive(node.children[i]);
                 }
             }
@@ -165,7 +165,7 @@ export async function getIfInfo(node) {
 
 export async function getIfInfoList(if_list) {
     try {
-        // console.log('run getIfInfoList');
+        console.log("run getIfInfoList");
         let if_info_list = []
 
         let temp_if_list = lodash.clone(if_list);
@@ -178,7 +178,7 @@ export async function getIfInfoList(if_list) {
 
             let child_if_list_mark = []
             child_if_list.forEach(child => {
-                child_if_list_mark.push(child.mark)
+                child_if_list_mark.push(lodash.clone(child.mark))
             })
 
             let valid_binary_expression_list = []
@@ -200,7 +200,7 @@ export async function getIfInfoList(if_list) {
                             }
                         })
                         if (!existed_be) {
-                            valid_binary_expression_list.push(be)
+                            valid_binary_expression_list.push(lodash.clone(be))
                         }
                     }
                 }
@@ -208,7 +208,7 @@ export async function getIfInfoList(if_list) {
                     valid_binary_expression_list = binary_expression_list
                 }
             })
-            if_info_list.push({
+            if_info_list.push(lodash.clone({
                 par_mark: e.node.par_mark,
                 mark: e.node.mark,
                 info,
@@ -216,7 +216,7 @@ export async function getIfInfoList(if_list) {
                 // binary_expression_list,
                 valid_binary_expression_list,
                 identifier_list,
-            })
+            }))
 
         }
         // console.log('if_info_list ======================');

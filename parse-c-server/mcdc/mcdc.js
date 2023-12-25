@@ -1,10 +1,12 @@
+import lodash from 'lodash';
+
 export function getMcdc(trust_table) {
 
     /** For a1 */
     let a1_decide_list = [];
     trust_table.forEach(e => {
         if (e.a1 == e.result) {
-            a1_decide_list.push(e);
+            a1_decide_list.push(lodash.clone(e));
         }
     });
 
@@ -34,9 +36,9 @@ export function getMcdc(trust_table) {
                     }
                     if (need_insert) {
                         let element = [];
-                        element.push({ row: a1_decide_list[i].row })
-                        element.push({ row: a1_decide_list[j].row });
-                        a1_pair_list.push(element);
+                        element.push(lodash.clone({ row: a1_decide_list[i].row }))
+                        element.push(lodash.clone({ row: a1_decide_list[j].row }));
+                        a1_pair_list.push(lodash.clone(element));
                     }
                 }
             }
@@ -47,7 +49,7 @@ export function getMcdc(trust_table) {
     let a2_decide_list = [];
     trust_table.forEach(e => {
         if (e.a2 == e.result) {
-            a2_decide_list.push(e);
+            a2_decide_list.push(lodash.clone(e));
         }
     });
 
@@ -77,9 +79,9 @@ export function getMcdc(trust_table) {
                     }
                     if (need_insert) {
                         let element = [];
-                        element.push({ row: a2_decide_list[i].row })
-                        element.push({ row: a2_decide_list[j].row });
-                        a2_pair_list.push(element);
+                        element.push(lodash.clone({ row: a2_decide_list[i].row }))
+                        element.push(lodash.clone({ row: a2_decide_list[j].row }));
+                        a2_pair_list.push(lodash.clone(element));
                     }
                 }
             }
@@ -89,7 +91,7 @@ export function getMcdc(trust_table) {
     let a3_decide_list = [];
     trust_table.forEach(e => {
         if (e.a3 == e.result) {
-            a3_decide_list.push(e);
+            a3_decide_list.push(lodash.clone(e));
         }
     });
 
@@ -119,9 +121,9 @@ export function getMcdc(trust_table) {
                     }
                     if (need_insert) {
                         let element = [];
-                        element.push({ row: a3_decide_list[i].row })
-                        element.push({ row: a3_decide_list[j].row });
-                        a3_pair_list.push(element);
+                        element.push(lodash.clone({ row: a3_decide_list[i].row }))
+                        element.push(lodash.clone({ row: a3_decide_list[j].row }));
+                        a3_pair_list.push(lodash.clone(element));
                     }
                 }
             }
@@ -131,7 +133,7 @@ export function getMcdc(trust_table) {
     let a4_decide_list = [];
     trust_table.forEach(e => {
         if (e.a4 == e.result) {
-            a4_decide_list.push(e);
+            a4_decide_list.push(lodash.clone(e));
         }
     });
 
@@ -161,9 +163,9 @@ export function getMcdc(trust_table) {
                     }
                     if (need_insert) {
                         let element = [];
-                        element.push({ row: a4_decide_list[i].row })
-                        element.push({ row: a4_decide_list[j].row });
-                        a4_pair_list.push(element);
+                        element.push(lodash.clone({ row: a4_decide_list[i].row }))
+                        element.push(lodash.clone({ row: a4_decide_list[j].row }));
+                        a4_pair_list.push(lodash.clone(element));
                     }
                 }
             }
@@ -173,7 +175,7 @@ export function getMcdc(trust_table) {
     let a5_decide_list = [];
     trust_table.forEach(e => {
         if (e.a5 == e.result) {
-            a5_decide_list.push(e);
+            a5_decide_list.push(lodash.clone(e));
         }
     });
 
@@ -203,9 +205,9 @@ export function getMcdc(trust_table) {
                     }
                     if (need_insert) {
                         let element = [];
-                        element.push({ row: a5_decide_list[i].row })
-                        element.push({ row: a5_decide_list[j].row });
-                        a5_pair_list.push(element);
+                        element.push(lodash.clone({ row: a5_decide_list[i].row }))
+                        element.push(lodash.clone({ row: a5_decide_list[j].row }));
+                        a5_pair_list.push(lodash.clone(element));
                     }
                 }
             }
@@ -215,7 +217,7 @@ export function getMcdc(trust_table) {
     let a6_decide_list = [];
     trust_table.forEach(e => {
         if (e.a6 == e.result) {
-            a6_decide_list.push(e);
+            a6_decide_list.push(lodash.clone(e));
         }
     });
 
@@ -245,9 +247,9 @@ export function getMcdc(trust_table) {
                     }
                     if (need_insert) {
                         let element = [];
-                        element.push({ row: a6_decide_list[i].row })
-                        element.push({ row: a6_decide_list[j].row });
-                        a6_pair_list.push(element);
+                        element.push(lodash.clone({ row: a6_decide_list[i].row }))
+                        element.push(lodash.clone({ row: a6_decide_list[j].row }));
+                        a6_pair_list.push(lodash.clone(element));
                     }
                 }
             }

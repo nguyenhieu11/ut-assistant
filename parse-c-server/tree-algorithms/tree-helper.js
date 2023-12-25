@@ -1,3 +1,4 @@
+import lodash from 'lodash';
 
 export function isInsideNode(node, target_mark) {
 
@@ -28,8 +29,8 @@ export function getNodeType(root, target_type) {
 
     let stack = [];
     let preorder = [];
-    preorder.push(root.mark);
-    stack.push(root);
+    preorder.push(lodash.clone(root.mark));
+    stack.push(lodash.clone(root));
 
     while (stack.length > 0) {
         // 'flag' checks whether all the child
@@ -52,16 +53,16 @@ export function getNodeType(root, target_type) {
             for (let i = 0; i < par.children.length; i++) {
                 if (!preorder.includes(par.children[i].mark)) {
                     flag = 1;
-                    stack.push(par.children[i]);
-                    preorder.push(par.children[i].mark);
+                    stack.push(lodash.clone(par.children[i]));
+                    preorder.push(lodash.clone(par.children[i].mark));
 
                     let node = par.children[i];
                     if (node.type == target_type) {
-                        target_list.push({
+                        target_list.push(lodash.clone({
                             node,
                             // par_mark: par.mark,
                             mark: node.mark
-                        })
+                        }))
                     }
                     break;
 
@@ -78,4 +79,48 @@ export function getNodeType(root, target_type) {
     // console.log(preorder);
     return target_list
 
+}
+
+class NodeWithMark {
+    constructor(mark, text, type, startPosition, endPosition, node) {
+        this.mark = mark;
+        this.text = text;
+        this.type = type;
+        this.startPosition = startPosition;
+        this.endPosition = endPosition;
+        this.node = node;
+        this.children = [];
+        // if (children !== null) {
+        //     for (const child of children) {
+        //         this.children.push(new NodeWithMark(child.mark, child.children));
+        //     }
+        // }
+    }
+}
+
+export async function cloneArrayTreeWithMark(root) {
+    if (!root) {
+        return root;
+    }
+    const head = new NodeWithMark(root.mark, root.text, root.type, root.startPosition, root.endPosition, root.node);
+    const queue = [[root, head]];
+
+    while (queue.length > 0) {
+
+        const [node, cloned] = queue.shift();
+        for (const child of node.children) {
+            const newChild = new NodeWithMark(
+                child.mark,
+                child.text,
+                child.type,
+                child.startPosition,
+                child.endPosition,
+                child.node);
+
+            cloned.children.push(newChild);
+            queue.push([child, newChild]);
+        }
+    }
+
+    return head;
 }

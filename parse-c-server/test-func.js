@@ -2,9 +2,9 @@
 import lodash from 'lodash';
 import { markNumPreorderTree, checkPreorder } from './preorder-traversal.js';
 
-export async function findTestFunc(root_node) {
+export async function findGlobalFunc(root_node) {
     try {
-        console.log("run findTestFunc");
+        console.log("run findGlobalFunc");
 
         if (root_node.type !== 'translation_unit') {
             console.log('Error: This node is not translation_unit')
@@ -18,7 +18,7 @@ export async function findTestFunc(root_node) {
 
         /** Find if condition with recursive */
 
-        let test_func_list = [];
+        let global_func_list = [];
         /** Declare mark num of tree with preorder */
         for (const lv_1 of temp_root.children) {
             if (lv_1.type == 'function_definition') {
@@ -26,7 +26,10 @@ export async function findTestFunc(root_node) {
                 func.startPosition = lv_1.startPosition;
                 func.endPosition = lv_1.endPosition;
                 for (const lv_2 of lv_1.children) {
-                    if (lv_2.type == 'type_identifier') {
+                    if (lv_2.type == 'storage_class_specifier') {
+                        func.storage_class_specifier = lv_2.text;
+                    }
+                    else if (lv_2.type == 'type_identifier') {
                         func.type_identifier = lv_2.text;
                     }
                     else if (lv_2.type == 'primitive_type') {
@@ -56,8 +59,8 @@ export async function findTestFunc(root_node) {
                                                 param.pointer_declarator = lv_5.text
                                             }
                                         }
-                                        declarator_list.push(param)
-                                        // declarator_list.push(lv_4.text);
+                                        declarator_list.push(lodash.clone(param))
+                                        // declarator_list.push(lodash.clone(lv_4.text);
                                     }
                                 }
                                 func.declarator_list = declarator_list;
@@ -65,13 +68,13 @@ export async function findTestFunc(root_node) {
                         }
                     }
                 }
-                test_func_list.push(func);
+                global_func_list.push(lodash.clone(func));
             }
         }
 
-        // await findTestFuncRecursive(temp_root);
+        // await findGlobalFuncRecursive(temp_root);
         // console.log(temp_root.type)
-        return test_func_list;
+        return global_func_list;
 
     } catch (error) {
         throw error;

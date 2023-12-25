@@ -4,7 +4,7 @@ import { findIdentifier } from './identifier-handle.js';
 
 export async function findPreProcDefine(root_node) {
     try {
-        // console.log("run findPreProcDefine");
+        console.log("run findPreProcDefine");
         let temp_root = lodash.clone(root_node);
         /** Try to re-mark the tree */
         if (!(await checkPreorder(temp_root))) {
@@ -22,17 +22,17 @@ export async function findPreProcDefine(root_node) {
                     startPosition: node.startPosition,
                     endPosition: node.endPosition
                 }
-                for (let i = 0; i < node.childCount; i++) {
+                for (let i = 0; i < node.children.length; i++) {
                     if (node.children[i].type == "identifier") {
                         preproc.identifier = node.children[i].text
                     } else if (node.children[i].type == "preproc_arg") {
                         preproc.preproc_arg = node.children[i].text
                     }
                 }
-                preproc_list.push(preproc)
+                preproc_list.push(lodash.clone(preproc))
             }
-            if (node.childCount) {
-                for (let i = 0; i < node.childCount; i++) {
+            if (node.children.length) {
+                for (let i = 0; i < node.children.length; i++) {
                     await findPreProcRecursive(node.children[i]);
                 }
             }
@@ -49,7 +49,7 @@ export async function findPreProcDefine(root_node) {
 
 export async function findEnumerator(root_node) {
     try {
-        // console.log("run findEnumerator");
+        console.log("run findEnumerator");
         let temp_root = lodash.clone(root_node);
         /** Try to re-mark the tree */
         if (!(await checkPreorder(temp_root))) {
@@ -67,17 +67,17 @@ export async function findEnumerator(root_node) {
                     startPosition: node.startPosition,
                     endPosition: node.endPosition
                 }
-                for (let i = 0; i < node.childCount; i++) {
+                for (let i = 0; i < node.children.length; i++) {
                     if (node.children[i].type == "identifier") {
                         preproc.identifier = node.children[i].text
                     } else if (node.children[i].type == "number_literal") {
                         preproc.number_literal = node.children[i].text
                     }
                 }
-                enumerator_list.push(preproc)
+                enumerator_list.push(lodash.clone(preproc))
             }
-            if (node.childCount) {
-                for (let i = 0; i < node.childCount; i++) {
+            if (node.children.length) {
+                for (let i = 0; i < node.children.length; i++) {
                     await findEnumRecursive(node.children[i]);
                 }
             }
