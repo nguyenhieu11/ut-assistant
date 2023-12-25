@@ -2,38 +2,29 @@
 
 #include "E2E_MemMap.h"
 
-int g_Count = 1;
+int g_count = 1;
 
-static char g_Char = 2;
+int g_var;
 
-static Std_ReturnType g_Std;
-
-int arr_1[];
-
-static int arr_2[10];
-
-Std_ReturnType arr_3[];
-
-static Std_ReturnType arr_4[10];
-
-static Std_ReturnType E2E_P05CheckInit()
+static Std_ReturnType E2E_P05CheckInit(int local_var)
 {
-    int param_1 = custom_a, param_2 = custom_b;
-    Std_ReturnType param_3;
-    Std_ReturnType *param_5 = NULL;
-    Std_ReturnType *param_6;
-    Std_ReturnType error_en = E2E_E_INTERR;
-    int res_int;
 
-    res_int = Stub_function_01(param_1, param_2);
+    Std_ReturnType error_en;
 
-    error_en = Stub_function_02(param_1, param_5);
+    /** CASE 1: value is assigned by global var directly */
+    g_count = g_var;
 
-    Stub_function_03(param_1, param_3);
-    Stub_function_04(param_1, &param_2);
+    /** CASE 2: value is assigned by local_var var directly */
+    g_count = local_var;
+
+    /** CASE 3: value is assigned by stub function - no parameter*/
+    g_count = stub_func_no_param();
+
+    /** CASE 4: value is assigned by stub function - parameter as pointer */
+    stub_func_pointer(&g_count);
 
     /* Check for NULL pointer */
-    if (1 == g_Count)
+    if (1 == g_count)
     {
         error_en = E2E_E_INPUTERR_NULL;
     }
