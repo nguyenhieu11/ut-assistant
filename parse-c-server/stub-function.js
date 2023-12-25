@@ -342,64 +342,72 @@ export async function generateStubFuncDefineString(called_stub_func_list, module
         extern_str += `\n/** Function directly return void */`
         for (const no_assigned_func of no_assigned_stub_func_list) {
             extern_str += `\n\tvoid ${no_assigned_func.identifier}(`
-            for (const argm of no_assigned_func.argument_list) {
-                if (argm.identifier) {
-                    if (argm.pointer_declarator) {
-                        if (argm.primitive_type) {
-                            extern_str += ` ${argm.primitive_type} *${argm.identifier},`
-                        } else if (argm.type_identifier) {
-                            extern_str += ` ${argm.type_identifier} *${argm.identifier},`
+            /** Function has no argument */
+            if (no_assigned_func.argument_list.length) {
+                for (const argm of no_assigned_func.argument_list) {
+                    if (argm.identifier) {
+                        if (argm.pointer_declarator) {
+                            if (argm.primitive_type) {
+                                extern_str += ` ${argm.primitive_type} *${argm.identifier},`
+                            } else if (argm.type_identifier) {
+                                extern_str += ` ${argm.type_identifier} *${argm.identifier},`
+                            }
                         }
-                    }
-                    else {
-                        if (argm.primitive_type) {
-                            extern_str += ` ${argm.primitive_type} ${argm.identifier},`
-                        } else if (argm.type_identifier) {
-                            extern_str += ` ${argm.type_identifier} ${argm.identifier},`
+                        else {
+                            if (argm.primitive_type) {
+                                extern_str += ` ${argm.primitive_type} ${argm.identifier},`
+                            } else if (argm.type_identifier) {
+                                extern_str += ` ${argm.type_identifier} ${argm.identifier},`
+                            }
                         }
-                    }
-                } else if (argm.pointer_expression) {
-                    if (argm.primitive_type) {
-                        extern_str += ` ${argm.primitive_type} *${argm.pointer_expression},`
-                    } else if (argm.type_identifier) {
-                        extern_str += ` ${argm.type_identifier} *${argm.pointer_expression},`
+                    } else if (argm.pointer_expression) {
+                        if (argm.primitive_type) {
+                            extern_str += ` ${argm.primitive_type} *${argm.pointer_expression},`
+                        } else if (argm.type_identifier) {
+                            extern_str += ` ${argm.type_identifier} *${argm.pointer_expression},`
+                        }
                     }
                 }
+                extern_str = extern_str.slice(0, -1);
             }
-            extern_str = extern_str.slice(0, -1);
+
             extern_str += `){}`
         }
         extern_str += `\n\n/** Stub function affect to code */`
         for (const assigned_func of assigned_stub_func_list) {
             extern_str += `\n\t${assigned_func.assign_to.data_type} ${assigned_func.identifier}(`
-            for (const argm of assigned_func.argument_list) {
-                if (argm.identifier) {
-                    /** Pointer */
-                    if (argm.pointer_declarator) {
-                        if (argm.primitive_type) {
-                            extern_str += ` ${argm.primitive_type} *${argm.identifier},`
-                        } else if (argm.type_identifier) {
-                            extern_str += ` ${argm.type_identifier} *${argm.identifier},`
-                        }
-                    }
-                    /** NOT pointer */
-                    else {
-                        if (argm.primitive_type) {
-                            extern_str += ` ${argm.primitive_type} ${argm.identifier},`
-                        } else if (argm.type_identifier) {
-                            extern_str += ` ${argm.type_identifier} ${argm.identifier},`
-                        }
-                    }
 
-                } else if (argm.pointer_expression) {
-                    if (argm.primitive_type) {
-                        extern_str += ` ${argm.primitive_type} *${argm.pointer_expression},`
-                    } else if (argm.type_identifier) {
-                        extern_str += ` ${argm.type_identifier} *${argm.pointer_expression},`
+            if (assigned_func.argument_list.length) {
+                for (const argm of assigned_func.argument_list) {
+                    if (argm.identifier) {
+                        /** Pointer */
+                        if (argm.pointer_declarator) {
+                            if (argm.primitive_type) {
+                                extern_str += ` ${argm.primitive_type} *${argm.identifier},`
+                            } else if (argm.type_identifier) {
+                                extern_str += ` ${argm.type_identifier} *${argm.identifier},`
+                            }
+                        }
+                        /** NOT pointer */
+                        else {
+                            if (argm.primitive_type) {
+                                extern_str += ` ${argm.primitive_type} ${argm.identifier},`
+                            } else if (argm.type_identifier) {
+                                extern_str += ` ${argm.type_identifier} ${argm.identifier},`
+                            }
+                        }
+
+                    } else if (argm.pointer_expression) {
+                        if (argm.primitive_type) {
+                            extern_str += ` ${argm.primitive_type} *${argm.pointer_expression},`
+                        } else if (argm.type_identifier) {
+                            extern_str += ` ${argm.type_identifier} *${argm.pointer_expression},`
+                        }
                     }
                 }
+                extern_str = extern_str.slice(0, -1);
             }
-            extern_str = extern_str.slice(0, -1);
+
             extern_str += `);`
         }
         extern_str += `\n}`
@@ -408,30 +416,32 @@ export async function generateStubFuncDefineString(called_stub_func_list, module
         let mock_str = ''
         for (const assigned_func of assigned_stub_func_list) {
             mock_str += `\nMOCK_METHOD${assigned_func.argument_list.length}(${assigned_func.identifier}, ${assigned_func.assign_to?.data_type}(`
-            for (const argm of assigned_func.argument_list) {
-                if (argm.identifier) {
-                    if (argm.pointer_declarator) {
-                        if (argm.primitive_type) {
-                            mock_str += ` ${argm.primitive_type} *${argm.identifier},`
-                        } else if (argm.type_identifier) {
-                            mock_str += ` ${argm.type_identifier} *${argm.identifier},`
+            if (assigned_func.argument_list.length) {
+                for (const argm of assigned_func.argument_list) {
+                    if (argm.identifier) {
+                        if (argm.pointer_declarator) {
+                            if (argm.primitive_type) {
+                                mock_str += ` ${argm.primitive_type} *${argm.identifier},`
+                            } else if (argm.type_identifier) {
+                                mock_str += ` ${argm.type_identifier} *${argm.identifier},`
+                            }
+                        } else {
+                            if (argm.primitive_type) {
+                                mock_str += ` ${argm.primitive_type} ${argm.identifier},`
+                            } else if (argm.type_identifier) {
+                                mock_str += ` ${argm.type_identifier} ${argm.identifier},`
+                            }
                         }
-                    } else {
+                    } else if (argm.pointer_expression) {
                         if (argm.primitive_type) {
-                            mock_str += ` ${argm.primitive_type} ${argm.identifier},`
+                            mock_str += ` ${argm.primitive_type} *${argm.pointer_expression},`
                         } else if (argm.type_identifier) {
-                            mock_str += ` ${argm.type_identifier} ${argm.identifier},`
+                            mock_str += ` ${argm.type_identifier} *${argm.pointer_expression},`
                         }
-                    }
-                } else if (argm.pointer_expression) {
-                    if (argm.primitive_type) {
-                        mock_str += ` ${argm.primitive_type} *${argm.pointer_expression},`
-                    } else if (argm.type_identifier) {
-                        mock_str += ` ${argm.type_identifier} *${argm.pointer_expression},`
                     }
                 }
+                mock_str = mock_str.slice(0, -1);
             }
-            mock_str = mock_str.slice(0, -1);
             mock_str += `));`;
         }
         mock_str += `\n`;
@@ -440,42 +450,48 @@ export async function generateStubFuncDefineString(called_stub_func_list, module
         let define_str = ''
         for (const assigned_func of assigned_stub_func_list) {
             define_str += `\n${assigned_func.assign_to?.data_type} ${assigned_func.identifier}(`
-            for (const argm of assigned_func.argument_list) {
-                if (argm.identifier) {
-                    if (argm.pointer_declarator) {
-                        if (argm.primitive_type) {
-                            define_str += ` ${argm.primitive_type} *${argm.identifier},`
-                        } else if (argm.type_identifier) {
-                            define_str += ` ${argm.type_identifier} *${argm.identifier},`
-                        }
-                    } else {
-                        if (argm.primitive_type) {
-                            define_str += ` ${argm.primitive_type} ${argm.identifier},`
-                        } else if (argm.type_identifier) {
-                            define_str += ` ${argm.type_identifier} ${argm.identifier},`
-                        }
-                    }
 
-                } else if (argm.pointer_expression) {
-                    if (argm.primitive_type) {
-                        define_str += ` ${argm.primitive_type} *${argm.pointer_expression},`
-                    } else if (argm.type_identifier) {
-                        define_str += ` ${argm.type_identifier} *${argm.pointer_expression},`
+            if (assigned_func.argument_list.length) {
+                for (const argm of assigned_func.argument_list) {
+                    if (argm.identifier) {
+                        if (argm.pointer_declarator) {
+                            if (argm.primitive_type) {
+                                define_str += ` ${argm.primitive_type} *${argm.identifier},`
+                            } else if (argm.type_identifier) {
+                                define_str += ` ${argm.type_identifier} *${argm.identifier},`
+                            }
+                        } else {
+                            if (argm.primitive_type) {
+                                define_str += ` ${argm.primitive_type} ${argm.identifier},`
+                            } else if (argm.type_identifier) {
+                                define_str += ` ${argm.type_identifier} ${argm.identifier},`
+                            }
+                        }
+
+                    } else if (argm.pointer_expression) {
+                        if (argm.primitive_type) {
+                            define_str += ` ${argm.primitive_type} *${argm.pointer_expression},`
+                        } else if (argm.type_identifier) {
+                            define_str += ` ${argm.type_identifier} *${argm.pointer_expression},`
+                        }
                     }
                 }
+                define_str = define_str.slice(0, -1);
             }
-            define_str = define_str.slice(0, -1);
+
             define_str += `)`
             define_str += `{\n\t`;
             define_str += `return Stub::s_instance->${assigned_func.identifier}(`
-            for (const argm of assigned_func.argument_list) {
-                if (argm.identifier) {
-                    define_str += ` ${argm.identifier},`
-                } else if (argm.pointer_expression) {
-                    define_str += ` ${argm.pointer_expression},`
+            if (assigned_func.argument_list.length) {
+                for (const argm of assigned_func.argument_list) {
+                    if (argm.identifier) {
+                        define_str += ` ${argm.identifier},`
+                    } else if (argm.pointer_expression) {
+                        define_str += ` ${argm.pointer_expression},`
+                    }
                 }
+                define_str = define_str.slice(0, -1);
             }
-            define_str = define_str.slice(0, -1);
             define_str += `);`
             define_str += `\n}`
         }
