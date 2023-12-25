@@ -152,9 +152,9 @@ export function getFuncLocalVarList(func_node) {
 
 
 export function getIfStatement(node, path = '') {
-    if (node.childCount) {
-        // console.log(node.childCount);
-        for (let i = 0; i < node.childCount; i++) {
+    if (node.children.length) {
+        // console.log(node.children.length);
+        for (let i = 0; i < node.children.length; i++) {
             console.log('........ i: ', i);
             path = path + i;
             if (node.children[i].type == "if_statement") {

@@ -25,8 +25,8 @@ export async function findIfCondition(root_node) {
                     mark: node.mark ? node.mark : null
                 }))
             }
-            if (node.childCount) {
-                for (let i = 0; i < node.childCount; i++) {
+            if (node.children.length) {
+                for (let i = 0; i < node.children.length; i++) {
                     await findIfRecursive(node.children[i]);
                 }
             }
@@ -55,8 +55,8 @@ export async function findChildIfCondition(root_node) {
         let child_if_list = [];
         /** Declare mark num of tree with preorder */
         async function findChildIfRecursive(node) {
-            if (node.childCount) {
-                for (let i = 0; i < node.childCount; i++) {
+            if (node.children.length) {
+                for (let i = 0; i < node.children.length; i++) {
                     if (node.children[i].type == "if_statement") {
                         /** Only push NOT existed node */
                         let is_existed = false;
@@ -125,8 +125,8 @@ export async function findBinaryExpression(root_node) {
                     }))
                 }
             }
-            if (node.childCount) {
-                for (let i = 0; i < node.childCount; i++) {
+            if (node.children.length) {
+                for (let i = 0; i < node.children.length; i++) {
                     await findBinaryExpressionRecursive(node.children[i]);
                 }
             }

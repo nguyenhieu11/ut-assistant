@@ -74,8 +74,8 @@ export async function findNoAssignedStubFunc(root_node) {
                 }
 
             }
-            if (node.childCount) {
-                for (let i = 0; i < node.childCount; i++) {
+            if (node.children.length) {
+                for (let i = 0; i < node.children.length; i++) {
                     await findNoAssignedStubFuncRecursive(node.children[i]);
                 }
             }
@@ -166,8 +166,8 @@ export async function findAssignedStubFunc(root_node) {
                     }
                 }
             }
-            if (node.childCount) {
-                for (let i = 0; i < node.childCount; i++) {
+            if (node.children.length) {
+                for (let i = 0; i < node.children.length; i++) {
                     await findAssignedStubFuncRecursive(node.children[i]);
                 }
             }
@@ -277,8 +277,8 @@ export async function getParamDataTypeOfStubFunc(root_node, assigned_stub_func_l
                     }
                     // local_var_list.push(lodash.clone(local_var_info);
                 }
-                if (node.childCount) {
-                    for (let i = 0; i < node.childCount; i++) {
+                if (node.children.length) {
+                    for (let i = 0; i < node.children.length; i++) {
                         await getLocalDeclarationListRecursive(node.children[i]);
                     }
                 }
@@ -442,11 +442,20 @@ export async function generateStubFuncDefineString(called_stub_func_list, module
             define_str += `\n${assigned_func.assign_to?.data_type} ${assigned_func.identifier}(`
             for (const argm of assigned_func.argument_list) {
                 if (argm.identifier) {
-                    if (argm.primitive_type) {
-                        define_str += ` ${argm.primitive_type} ${argm.identifier},`
-                    } else if (argm.type_identifier) {
-                        define_str += ` ${argm.type_identifier} ${argm.identifier},`
+                    if (argm.pointer_declarator) {
+                        if (argm.primitive_type) {
+                            define_str += ` ${argm.primitive_type} *${argm.identifier},`
+                        } else if (argm.type_identifier) {
+                            define_str += ` ${argm.type_identifier} *${argm.identifier},`
+                        }
+                    } else {
+                        if (argm.primitive_type) {
+                            define_str += ` ${argm.primitive_type} ${argm.identifier},`
+                        } else if (argm.type_identifier) {
+                            define_str += ` ${argm.type_identifier} ${argm.identifier},`
+                        }
                     }
+
                 } else if (argm.pointer_expression) {
                     if (argm.primitive_type) {
                         define_str += ` ${argm.primitive_type} *${argm.pointer_expression},`
@@ -470,9 +479,6 @@ export async function generateStubFuncDefineString(called_stub_func_list, module
             define_str += `);`
             define_str += `\n}`
         }
-
-
-
         return { extern_str, mock_str, define_str };
 
     } catch (error) {

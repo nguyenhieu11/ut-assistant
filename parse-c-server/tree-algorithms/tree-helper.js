@@ -80,3 +80,47 @@ export function getNodeType(root, target_type) {
     return target_list
 
 }
+
+class NodeWithMark {
+    constructor(mark, text, type, startPosition, endPosition, node) {
+        this.mark = mark;
+        this.text = text;
+        this.type = type;
+        this.startPosition = startPosition;
+        this.endPosition = endPosition;
+        this.node = node;
+        this.children = [];
+        // if (children !== null) {
+        //     for (const child of children) {
+        //         this.children.push(new NodeWithMark(child.mark, child.children));
+        //     }
+        // }
+    }
+}
+
+export async function cloneArrayTreeWithMark(root) {
+    if (!root) {
+        return root;
+    }
+    const head = new NodeWithMark(root.mark, root.text, root.type, root.startPosition, root.endPosition, root.node);
+    const queue = [[root, head]];
+
+    while (queue.length > 0) {
+
+        const [node, cloned] = queue.shift();
+        for (const child of node.children) {
+            const newChild = new NodeWithMark(
+                child.mark,
+                child.text,
+                child.type,
+                child.startPosition,
+                child.endPosition,
+                child.node);
+
+            cloned.children.push(newChild);
+            queue.push([child, newChild]);
+        }
+    }
+
+    return head;
+}

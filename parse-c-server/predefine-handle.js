@@ -22,7 +22,7 @@ export async function findPreProcDefine(root_node) {
                     startPosition: node.startPosition,
                     endPosition: node.endPosition
                 }
-                for (let i = 0; i < node.childCount; i++) {
+                for (let i = 0; i < node.children.length; i++) {
                     if (node.children[i].type == "identifier") {
                         preproc.identifier = node.children[i].text
                     } else if (node.children[i].type == "preproc_arg") {
@@ -31,8 +31,8 @@ export async function findPreProcDefine(root_node) {
                 }
                 preproc_list.push(lodash.clone(preproc))
             }
-            if (node.childCount) {
-                for (let i = 0; i < node.childCount; i++) {
+            if (node.children.length) {
+                for (let i = 0; i < node.children.length; i++) {
                     await findPreProcRecursive(node.children[i]);
                 }
             }
@@ -67,7 +67,7 @@ export async function findEnumerator(root_node) {
                     startPosition: node.startPosition,
                     endPosition: node.endPosition
                 }
-                for (let i = 0; i < node.childCount; i++) {
+                for (let i = 0; i < node.children.length; i++) {
                     if (node.children[i].type == "identifier") {
                         preproc.identifier = node.children[i].text
                     } else if (node.children[i].type == "number_literal") {
@@ -76,8 +76,8 @@ export async function findEnumerator(root_node) {
                 }
                 enumerator_list.push(lodash.clone(preproc))
             }
-            if (node.childCount) {
-                for (let i = 0; i < node.childCount; i++) {
+            if (node.children.length) {
+                for (let i = 0; i < node.children.length; i++) {
                     await findEnumRecursive(node.children[i]);
                 }
             }

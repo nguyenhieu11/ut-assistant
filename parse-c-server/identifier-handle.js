@@ -25,8 +25,8 @@ export async function findIdentifier(root_node) {
                     node
                 }))
             }
-            if (node.childCount) {
-                for (let i = 0; i < node.childCount; i++) {
+            if (node.children.length) {
+                for (let i = 0; i < node.children.length; i++) {
                     await findIdentifierRecursive(node.children[i]);
                 }
             }

@@ -347,8 +347,8 @@ export async function checkPreorder(root_node) {
                 mark: node.mark ? node.mark : null,
                 text: node.text ? node.text : null
             }));
-            if (node.childCount) {
-                for (let i = 0; i < node.childCount; i++) {
+            if (node.children.length) {
+                for (let i = 0; i < node.children.length; i++) {
                     await checkPreorderRecursive(node.children[i]);
                 }
             }
@@ -376,8 +376,8 @@ export async function markNumPreorderTree(root_node, start_num) {
         /** Declare mark num of tree with preorder */
         async function markNumPreorderRecursive(node) {
             node.mark = num_mark;
-            if (node.childCount) {
-                for (let i = 0; i < node.childCount; i++) {
+            if (node.children.length) {
+                for (let i = 0; i < node.children.length; i++) {
                     num_mark++
                     node.children[i].mark = num_mark;
                     await markNumPreorderRecursive(node.children[i]);

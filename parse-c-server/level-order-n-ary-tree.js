@@ -43,8 +43,8 @@ export function levelOrder(root) {
 
 // function markNumRecursive(node) {
 //     node.mark = num_mark;
-//     if (node.childCount) {
-//         for (let i = 0; i < node.childCount; i++) {
+//     if (node.children.length) {
+//         for (let i = 0; i < node.children.length; i++) {
 //             num_mark++
 //             node.children[i].mark = num_mark;
 //             markNumRecursive(node.children[i]);
