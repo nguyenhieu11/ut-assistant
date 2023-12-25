@@ -42,7 +42,7 @@ import {
 
 import fs from 'fs'
 import { findEnumerator, findPreProcDefine } from './predefine-handle.js';
-import { findTestFunc } from './test-func.js';
+import { findGlobalFunc } from './test-func.js';
 import { generateExternGlobalVariableString, generateExternGlobalFuncString, generateTestCaseString } from './test-file-template.js';
 import { findGlobalVar } from './identifier-handle.js';
 import { insertToTestFile } from './testing-file-handle.js';
@@ -184,7 +184,7 @@ app.get('/auto-generate', async (req, res) => {
 
         let if_list = await findIfCondition(root_node);
         let if_info_list = await getIfInfoList(if_list);
-        let test_func_list = await findTestFunc(root_node);
+        let global_func_list = await findGlobalFunc(root_node);
 
         /** Need fix: test_case_list is array in array*/
         const test_case_list = getTestCaseList(if_info_list, preproc_list, enum_list);
@@ -203,9 +203,9 @@ app.get('/auto-generate', async (req, res) => {
         })
 
         const global_var_list = await findGlobalVar(root_node);
-        const test_case_str = await generateTestCaseString(test_case_list, test_func_list, global_var_list);
+        const test_case_str = await generateTestCaseString(test_case_list, global_func_list, global_var_list);
 
-        const extern_global_func_str = await generateExternGlobalFuncString(test_func_list, test_module_name);
+        const extern_global_func_str = await generateExternGlobalFuncString(global_func_list, test_module_name);
         const extern_global_var_str = await generateExternGlobalVariableString(global_var_list, test_module_name);
 
         const called_stub_func_list = await getStubFunc(root_node);
@@ -213,7 +213,7 @@ app.get('/auto-generate', async (req, res) => {
 
         const final_content = await insertToTestFile(test_folder_path, test_module_name, test_case_str, extern_global_func_str, extern_global_var_str, stub_func_str)
 
-        // res.send({ root_node, header_root, test_case_list, test_func_list, called_stub_func_list, global_var_list, final_content });
+        // res.send({ root_node, header_root, test_case_list, global_func_list, called_stub_func_list, global_var_list, final_content });
         res.send(final_content);
 
         return;

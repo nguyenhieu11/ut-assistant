@@ -2,9 +2,9 @@
 import lodash from 'lodash';
 import { markNumPreorderTree, checkPreorder } from './preorder-traversal.js';
 
-export async function findTestFunc(root_node) {
+export async function findGlobalFunc(root_node) {
     try {
-        console.log("run findTestFunc");
+        console.log("run findGlobalFunc");
 
         if (root_node.type !== 'translation_unit') {
             console.log('Error: This node is not translation_unit')
@@ -18,7 +18,7 @@ export async function findTestFunc(root_node) {
 
         /** Find if condition with recursive */
 
-        let test_func_list = [];
+        let global_func_list = [];
         /** Declare mark num of tree with preorder */
         for (const lv_1 of temp_root.children) {
             if (lv_1.type == 'function_definition') {
@@ -68,13 +68,13 @@ export async function findTestFunc(root_node) {
                         }
                     }
                 }
-                test_func_list.push(lodash.clone(func));
+                global_func_list.push(lodash.clone(func));
             }
         }
 
-        // await findTestFuncRecursive(temp_root);
+        // await findGlobalFuncRecursive(temp_root);
         // console.log(temp_root.type)
-        return test_func_list;
+        return global_func_list;
 
     } catch (error) {
         throw error;

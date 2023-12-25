@@ -3,7 +3,7 @@ import lodash from 'lodash';
 import { markNumPreorderTree, checkPreorder } from './preorder-traversal.js';
 import { findIdentifier } from './identifier-handle.js';
 
-export async function generateTestCaseString(test_case_list, test_func_list, global_var_list) {
+export async function generateTestCaseString(test_case_list, global_func_list, global_var_list) {
     try {
         let insert_str = ''
         for (const tc_group of test_case_list) {
@@ -30,7 +30,7 @@ export async function generateTestCaseString(test_case_list, test_func_list, glo
                         }
                         /** check with parameter_list */
                         if (!get_type_ok) {
-                            test_func_list.forEach(func => {
+                            global_func_list.forEach(func => {
                                 if (tc.startPosition.row >= func.startPosition.row && tc.endPosition.row <= func.endPosition.row) {
                                     for (const decl of func.declarator_list) {
                                         if (decl.identifier && decl.identifier == as.identifier) {
@@ -99,7 +99,7 @@ export async function generateTestCaseString(test_case_list, test_func_list, glo
                 let declaration_of_func_str = ''
                 let param_of_func_str = ''
                 let expected_return_of_func = {}
-                test_func_list.forEach(func => {
+                global_func_list.forEach(func => {
                     if (tc.startPosition.row >= func.startPosition.row && tc.endPosition.row <= func.endPosition.row) {
                         func_name_str = func.identifier;
                         /** Get expected info of function */
@@ -177,10 +177,10 @@ export async function generateTestCaseString(test_case_list, test_func_list, glo
     }
 }
 
-export async function generateExternGlobalFuncString(test_func_list, module_name) {
+export async function generateExternGlobalFuncString(global_func_list, module_name) {
     try {
         let insert_str = ''
-        for (const func of test_func_list) {
+        for (const func of global_func_list) {
             /** */
             /** global variable is static */
             if (func.storage_class_specifier == 'static') {
