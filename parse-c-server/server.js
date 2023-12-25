@@ -43,7 +43,7 @@ import {
 import fs from 'fs'
 import { findEnumerator, findPreProcDefine } from './predefine-handle.js';
 import { findTestFunc } from './test-func.js';
-import { generateExternGlobalVariableString, generateExternTestFuncString, generateTestCaseString } from './test-file-template.js';
+import { generateExternGlobalVariableString, generateExternGlobalFuncString, generateTestCaseString } from './test-file-template.js';
 import { findGlobalVar } from './identifier-handle.js';
 import { insertToTestFile } from './testing-file-handle.js';
 import { generateStubFuncDefineString, getStubFunc } from './stub-function.js';
@@ -205,15 +205,15 @@ app.get('/auto-generate', async (req, res) => {
         const global_var_list = await findGlobalVar(root_node);
         const test_case_str = await generateTestCaseString(test_case_list, test_func_list, global_var_list);
 
-        const extern_func_str = await generateExternTestFuncString(test_func_list, test_module_name);
+        const extern_global_func_str = await generateExternGlobalFuncString(test_func_list, test_module_name);
         const extern_global_var_str = await generateExternGlobalVariableString(global_var_list, test_module_name);
 
         const called_stub_func_list = await getStubFunc(root_node);
         const stub_func_str = await generateStubFuncDefineString(called_stub_func_list);
 
-        const final_content = await insertToTestFile(test_folder_path, test_module_name, test_case_str, extern_func_str, extern_global_var_str, stub_func_str)
+        const final_content = await insertToTestFile(test_folder_path, test_module_name, test_case_str, extern_global_func_str, extern_global_var_str, stub_func_str)
 
-        // res.send({ root_node, header_root, test_case_list, test_func_list, global_var_list, final_content });
+        // res.send({ root_node, header_root, test_case_list, test_func_list, called_stub_func_list, global_var_list, final_content });
         res.send(final_content);
 
         return;

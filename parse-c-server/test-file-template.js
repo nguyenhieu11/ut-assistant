@@ -177,7 +177,7 @@ export async function generateTestCaseString(test_case_list, test_func_list, glo
     }
 }
 
-export async function generateExternTestFuncString(test_func_list, module_name) {
+export async function generateExternGlobalFuncString(test_func_list, module_name) {
     try {
         let insert_str = ''
         for (const func of test_func_list) {

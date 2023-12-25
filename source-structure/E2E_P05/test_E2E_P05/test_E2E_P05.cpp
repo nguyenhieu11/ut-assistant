@@ -15,9 +15,9 @@ using ::testing::Return;
 using ::testing::ReturnRef;
 
 /* Extern function */
-//==================BEGIN_AUTO_EXTERN_FUNCTION==================//
+//==================BEGIN_AUTO_EXTERN_GLOBAL_FUNCTION==================//
 
-//==================END_AUTO_EXTERN_FUNCTION==================//
+//==================END_AUTO_EXTERN_GLOBAL_FUNCTION==================//
 
 //==================BEGIN_AUTO_EXTERN_STUB_FUNCTION==================//
 

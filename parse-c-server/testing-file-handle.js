@@ -1,7 +1,7 @@
 import fs from 'fs'
 
 
-export async function insertToTestFile(folder_path, module_name, test_case_str, extern_func_str, extern_global_var_str, stub_func_str) {
+export async function insertToTestFile(folder_path, module_name, test_case_str, extern_global_func_str, extern_global_var_str, stub_func_str) {
     try {
         /**===== Start insert .cpp file =====*/
         let cpp_file_str = fs.readFileSync(`${folder_path}/test_${module_name}/test_${module_name}.cpp`, 'utf8');
@@ -20,18 +20,18 @@ export async function insertToTestFile(folder_path, module_name, test_case_str, 
         let modifiedContent = cpp_file_str.slice(0, beginIndex_TC_STRING + beginMarker_TC_STRING.length) + test_case_str + '\n\t' + cpp_file_str.slice(endIndex_TC_STRING);
 
         /** Insert extern function string */
-        const beginMarker_EXTERN_FUNC = '//==================BEGIN_AUTO_EXTERN_FUNCTION==================//';
-        const endMarker_EXTERN_FUNC = '//==================END_AUTO_EXTERN_FUNCTION==================//';
+        const beginMarker_EXTERN_GLOBAL_FUNC = '//==================BEGIN_AUTO_EXTERN_GLOBAL_FUNCTION==================//';
+        const endMarker_EXTERN_GLOBAL_FUNC = '//==================END_AUTO_EXTERN_GLOBAL_FUNCTION==================//';
 
-        const beginIndex_EXTERN_FUNC = modifiedContent.indexOf(beginMarker_EXTERN_FUNC);
-        const endIndex_EXTERN_FUNC = modifiedContent.indexOf(endMarker_EXTERN_FUNC, beginIndex_EXTERN_FUNC + beginMarker_EXTERN_FUNC.length);
+        const beginIndex_EXTERN_GLOBAL_FUNC = modifiedContent.indexOf(beginMarker_EXTERN_GLOBAL_FUNC);
+        const endIndex_EXTERN_GLOBAL_FUNC = modifiedContent.indexOf(endMarker_EXTERN_GLOBAL_FUNC, beginIndex_EXTERN_GLOBAL_FUNC + beginMarker_EXTERN_GLOBAL_FUNC.length);
 
-        if (beginIndex_EXTERN_FUNC === -1 || endIndex_EXTERN_FUNC === -1) {
+        if (beginIndex_EXTERN_GLOBAL_FUNC === -1 || endIndex_EXTERN_GLOBAL_FUNC === -1) {
             console.error('Markers EXTERN_FUNCTION not found in the file');
             return '';
         }
         // Delete the text between markers and insert the new text
-        modifiedContent = modifiedContent.slice(0, beginIndex_EXTERN_FUNC + beginMarker_EXTERN_FUNC.length) + extern_func_str + '\n' + modifiedContent.slice(endIndex_EXTERN_FUNC);
+        modifiedContent = modifiedContent.slice(0, beginIndex_EXTERN_GLOBAL_FUNC + beginMarker_EXTERN_GLOBAL_FUNC.length) + extern_global_func_str + '\n' + modifiedContent.slice(endIndex_EXTERN_GLOBAL_FUNC);
         // Write the modified content back to the file
 
         /** Insert extern function string */
