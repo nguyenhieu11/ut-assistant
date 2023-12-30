@@ -7,7 +7,6 @@ import util from 'util';
 
 import lodash from 'lodash';
 
-// import { cFunc } from './c-function.js';
 import {
     getFuncIdentifier,
     getFuncReturnType,
@@ -47,7 +46,10 @@ import { generateExternGlobalVariableString, generateExternGlobalFuncString, gen
 import { findGlobalVar } from './identifier-handle.js';
 import { insertToTestFile } from './testing-file-handle.js';
 import { generateStubFuncDefineString, getStubFunc } from './stub-function.js';
-import { cloneArrayTreeWithMark } from './tree-algorithms/tree-helper.js';
+import { cloneArrayTreeWithMark, getParentNode } from './tree-algorithms/treeHelper.js';
+import { findGloabalVariable } from './variable-declaration/variableDeclaration.js';
+import { findGlobalFuncDecl } from './function-definition/functionDefinition.js';
+import { findStubFunc } from './stub-function/stubFuncion.js';
 
 // import {
 //     getTrustTable
@@ -215,6 +217,43 @@ app.get('/auto-generate', async (req, res) => {
 
         // res.send({ root_node, header_root, test_case_list, global_func_list, called_stub_func_list, global_var_list, final_content });
         res.send(final_content);
+
+        return;
+    } catch (error) {
+        // Handle errors here
+        console.log(error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+// Define a route for the API endpoint
+app.get('/refactor', async (req, res) => {
+    try {
+        let test_folder_path = ''
+        let test_module_name = ''
+        if (req.query.absolute_path_of_testing_folder) {
+            console.log('absolute_path_of_testing_folder');
+            console.log(req.query.absolute_path_of_testing_folder);
+            test_folder_path = req.query.absolute_path_of_testing_folder
+        }
+        if (req.query.module_name) {
+            console.log('test_module_name');
+            console.log(req.query.module_name);
+            test_module_name = req.query.module_name.replace('.c', '');
+        }
+
+        let c_func_str = fs.readFileSync(`${test_folder_path}/${test_module_name}.c`, 'utf8');
+        const tree = parser.parse(c_func_str);
+
+        /** Just collect necessary data of root ( .c file )*/
+        const cloned_root = await cloneArrayTreeWithMark(tree.rootNode);
+        const source_root = await markNumPreorderTree(cloned_root, 1);
+
+        const source_global_var_list = await findGloabalVariable(source_root);
+        const global_func_list = await findGlobalFuncDecl(source_root);
+
+        const stub_func_list = await findStubFunc(source_root, global_func_list)
+        res.send({ stub_func_list });
 
         return;
     } catch (error) {

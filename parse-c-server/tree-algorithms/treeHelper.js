@@ -121,6 +121,34 @@ export async function cloneArrayTreeWithMark(root) {
             queue.push([child, newChild]);
         }
     }
-
     return head;
+}
+
+/**
+ * 
+ * @param {tree} root_node root node of source file 
+ * @param {number} child_mark is mark of child node need get parent
+ * @returns {tree} parent node 
+ */
+export async function getParentNode(root_node, child_mark) {
+    try {
+
+        let parent_node = {}
+        /** Declare recursive function */
+        async function findParentRecursive(node) {
+            for (let i = 0; i < node.children.length; i++) {
+                if (node.children[i].mark == child_mark) {
+                    parent_node = lodash.clone(node)
+                    break;
+                }
+                await findParentRecursive(node.children[i])
+            }
+        }
+
+        await findParentRecursive(root_node);
+        return parent_node
+    }
+    catch (error) {
+        throw (error)
+    }
 }
