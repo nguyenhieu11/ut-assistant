@@ -1,4 +1,4 @@
-import { isInsideNode, getNodeType } from "./tree-algorithms/tree-helper.js";
+import { isInsideNode, getNodeType } from "./tree-algorithms/treeHelper.js";
 import lodash from 'lodash';
 
 export function getCalledStubFunc(root_node, if_list, test_case_list) {
