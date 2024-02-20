@@ -47,9 +47,10 @@ import { findGlobalVar } from './identifier-handle.js';
 import { insertToTestFile } from './testing-file-handle.js';
 import { generateStubFuncDefineString, getStubFunc } from './stub-function.js';
 import { cloneArrayTreeWithMark, getParentNode } from './tree-algorithms/treeHelper.js';
-import { findGloabalVariable } from './variable-declaration/variableDeclaration.js';
+import { findGloabalVariableOfHeaderFile, findGloabalVariableOfSourceFile } from './variable-declaration/variableDeclaration.js';
 import { findGlobalFuncDecl } from './function-definition/functionDefinition.js';
 import { findStubFunc } from './stub-function/stubFuncion.js';
+import { findPreprocDefOfFile } from './preproc-define/preprocDefine.js';
 
 // import {
 //     getTrustTable
@@ -242,18 +243,31 @@ app.get('/refactor', async (req, res) => {
             test_module_name = req.query.module_name.replace('.c', '');
         }
 
-        let c_func_str = fs.readFileSync(`${test_folder_path}/${test_module_name}.c`, 'utf8');
-        const tree = parser.parse(c_func_str);
+        let source_file_str = fs.readFileSync(`${test_folder_path}/${test_module_name}.c`, 'utf8');
+        const source_tree = parser.parse(source_file_str);
+        let stub_header_str = fs.readFileSync(`${test_folder_path}/test_${test_module_name}/test_${test_module_name}.h`, 'utf8');
+        const stub_header_tree = parser.parse(stub_header_str);
 
         /** Just collect necessary data of root ( .c file )*/
-        const cloned_root = await cloneArrayTreeWithMark(tree.rootNode);
-        const source_root = await markNumPreorderTree(cloned_root, 1);
+        const cloned_source_tree = await cloneArrayTreeWithMark(source_tree.rootNode);
+        const source_root = await markNumPreorderTree(cloned_source_tree, 1);
+        const cloned_stub_header_tree = await cloneArrayTreeWithMark(stub_header_tree.rootNode);
+        const stub_header_root = await markNumPreorderTree(cloned_stub_header_tree, 1);
 
-        const source_global_var_list = await findGloabalVariable(source_root);
+        const source_global_var_list = await findGloabalVariableOfSourceFile(source_root);
+        const stub_header_global_var_list = await findGloabalVariableOfHeaderFile(stub_header_root);
         const global_func_list = await findGlobalFuncDecl(source_root);
 
-        const stub_func_list = await findStubFunc(source_root, global_func_list)
-        res.send({ stub_func_list });
+        const preproc_def_list = await findPreprocDefOfFile(stub_header_root);
+
+        const stub_func_list = await findStubFunc(
+            source_root,
+            global_func_list,
+            source_global_var_list,
+            stub_header_global_var_list,
+            preproc_def_list
+        )
+        res.send({ stub_header_root, preproc_def_list, stub_func_list });
 
         return;
     } catch (error) {

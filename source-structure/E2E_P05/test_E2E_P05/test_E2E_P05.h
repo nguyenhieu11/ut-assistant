@@ -15,24 +15,29 @@ typedef struct
 } E2E_P05ConfigType;
 
 #define E2E_E_INPUTERR_NULL 0x13U
-#define E2E_E_INPUTERR_WRONG 0x17U
-#define E2E_E_INTERR 0x19U
+#define E2E_E_INPUTERR_WRONG (0x17U)
+
+#define E2E_E_INTERR (0x19U * 2.54)
+#define E2E_E_INTERR (0x19U - 2.54)
+#define E2E_E_INTERR (0x19U + 2.54)
+#define E2E_E_INTERR (0x19U / 2.54) /** Get the last define with same name*/
+
 #define E2E_E_OK 0X00U
 #define E2E_E_WRONGSTATE 0x1AU
-#define E2E_P05_MAXCOUNTER 0XFFU
 
-/* Maximum counter value */
-#define E2E_P05_DELTACOUNTER_REPEATED 0U /* Delta counter value when message repeated */
-#define E2E_P05_DELTACOUNTER_OK 1U
-#define E2E_P05_COUNTER_OFFSET 2U
-#define E2E_P05_HEADER_SIZE 24U
+#define E2E_P05_MAXCOUNTER 12.1 * E2E_E_WRONGSTATE
 
-typedef struct
-{
+#define DEF_TEST_01 (12.1 + E2E_E_WRONGSTATE)
+#define DEF_TEST_02 (12.1 - E2E_E_WRONGSTATE)
+#define DEF_TEST_03 (12.1 * E2E_E_WRONGSTATE)
+#define DEF_TEST_04 (12.1 / E2E_E_WRONGSTATE)
 
-    uint8 Counter;
-} E2E_P05ProtectStateType;
-/* Size of E2E header in bits */
+#define E2E_P05_DELTACOUNTER_OK (-12 * E2E_E_WRONGSTATE)
+#define E2E_P05_DELTACOUNTER_REPEATED E2E_P05_MAXCOUNTER
+
+int g_count;
+
+int g_var;
 
 typedef struct
 {
