@@ -6,10 +6,22 @@ import { markNumPreorderTree, checkPreorder } from '../preorder-traversal.js';
 
 
 
-export async function findStubFunc(root_node, global_func_list) {
+export async function findStubFunc(
+    root_node,
+    global_func_list,
+    source_global_var_list,
+    stub_header_global_var_list,
+    preproc_def_list
+) {
     console.log("run findStubFunc");
     const stub_func_without_arg_type = await findStubFuncWithoutArgmType(root_node)
-    const stub_func_list = await findArgmTypeOfStubFunc(stub_func_without_arg_type, global_func_list)
+    const stub_func_list = await findArgmTypeOfStubFunc(
+        stub_func_without_arg_type,
+        global_func_list,
+        source_global_var_list,
+        stub_header_global_var_list,
+        preproc_def_list
+    )
     return stub_func_list
 }
 
@@ -95,7 +107,13 @@ async function findStubFuncWithoutArgmType(root_node) {
     }
 }
 
-async function findArgmTypeOfStubFunc(stub_func_list, global_func_list) {
+async function findArgmTypeOfStubFunc(
+    stub_func_list,
+    global_func_list,
+    source_global_var_list,
+    stub_header_global_var_list,
+    preproc_def_list
+) {
     try {
         console.log("run findArgmTypeOfStubFunc");
 
@@ -104,7 +122,7 @@ async function findArgmTypeOfStubFunc(stub_func_list, global_func_list) {
             for (const g_func of global_func_list) {
                 /** Check stub_func is called inside g_func */
                 if (g_func.children_mark_list.includes(stub_func.mark)) {
-                    /** If argm is local var */
+                    /** If argm is local var of global function */
                     for (const local_var of g_func.local_var_list) {
                         for (const argm of stub_func.argument_list) {
                             if (argm.identifier === local_var.identifier) {
@@ -115,19 +133,84 @@ async function findArgmTypeOfStubFunc(stub_func_list, global_func_list) {
                                     argm.type_identifier = local_var.type_identifier
                                 }
                                 if (local_var.is_pointer && !argm.is_pointer) {
-                                    console.log(`${argm.identifier} is pointer because local_var is pointer`)
+                                    console.log(`${argm.identifier} is pointer because local var is pointer`)
                                     argm.is_pointer = true
                                 }
                             }
                         }
                     }
                     /** If argm is parameter of global function ......... continue here... */
-                    /** If argm is global var of source file ......... continue here... */
-                    /** If argm is global var of stub.h  ......... continue here... */
-                    /** If argm is preproc of source file  ......... continue here... */
-                    /** If argm is preproc of stub.h  ......... continue here... */
+                    for (const param of g_func.param_decl_list) {
+                        for (const argm of stub_func.argument_list) {
+                            if (argm.identifier === param.identifier) {
+                                if (param.primitive_type) {
+                                    argm.primitive_type = param.primitive_type
+                                }
+                                if (param.type_identifier) {
+                                    argm.type_identifier = param.type_identifier
+                                }
+                                if (param.is_pointer && !argm.is_pointer) {
+                                    console.log(`${argm.identifier} is pointer because parameter of global function is pointer`)
+                                    argm.is_pointer = true
+                                }
+                            }
+                        }
+                    }
                 }
             }
+
+            /** If argm is global var of source file ......... continue here... */
+            for (const sg_var of source_global_var_list) {
+                for (const argm of stub_func.argument_list) {
+                    if (argm.identifier === sg_var.identifier) {
+                        if (sg_var.primitive_type) {
+                            argm.primitive_type = sg_var.primitive_type
+                        }
+                        if (sg_var.type_identifier) {
+                            argm.type_identifier = sg_var.type_identifier
+                        }
+                        if (sg_var.is_pointer && !argm.is_pointer) {
+                            console.log(`${argm.identifier} is pointer because source global var is pointer`)
+                            argm.is_pointer = true
+                        }
+                    }
+                }
+            }
+            /** If argm is global var of stub.h  ......... continue here... */
+            for (const shg_var of stub_header_global_var_list) {
+                for (const argm of stub_func.argument_list) {
+                    if (argm.identifier === shg_var.identifier) {
+                        if (shg_var.primitive_type) {
+                            argm.primitive_type = shg_var.primitive_type
+                        }
+                        if (shg_var.type_identifier) {
+                            argm.type_identifier = shg_var.type_identifier
+                        }
+                        if (shg_var.is_pointer && !argm.is_pointer) {
+                            console.log(`${argm.identifier} is pointer because stub header global var is pointer`)
+                            argm.is_pointer = true
+                        }
+                    }
+                }
+            }
+            /** If argm is preproc of source file  ......... continue here... */
+            for (const preproc of preproc_def_list) {
+                for (const argm of stub_func.argument_list) {
+                    if (argm.identifier === preproc.identifier) {
+                        if (preproc.arg_is_number) {
+                            argm.primitive_type = preproc.primitive_type
+                        }
+                        if (preproc.type_identifier) {
+                            argm.type_identifier = preproc.type_identifier
+                        }
+                        if (preproc.is_pointer && !argm.is_pointer) {
+                            console.log(`${argm.identifier} is pointer because stub header global var is pointer`)
+                            argm.is_pointer = true
+                        }
+                    }
+                }
+            }
+            /** If argm is preproc of stub.h  ......... continue here... */
 
         }
         return { stub_func_list, global_func_list }

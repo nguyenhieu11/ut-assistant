@@ -80,9 +80,9 @@ export async function parseVariableDeclaration(var_decl_node) {
  * @param {tree} root_node is root node of source file (.c)
  * @returns {var_decl[]}global variable list
  */
-export async function findGloabalVariable(root_node) {
+export async function findGloabalVariableOfSourceFile(root_node) {
     try {
-        console.log("run findGloabalVariable");
+        console.log("run findGloabalVariableOfSourceFile");
         if (root_node.type !== 'translation_unit') {
             console.log('Error: This node is NOT root of c file');
             return [];
@@ -101,6 +101,41 @@ export async function findGloabalVariable(root_node) {
                 let global_var = await parseVariableDeclaration(lv_1)
                 global_var_list.push(lodash.clone(global_var));
             }
+        }
+
+        return global_var_list;
+    }
+    catch (error) {
+        throw (error)
+    }
+}
+
+export async function findGloabalVariableOfHeaderFile(root_node) {
+    try {
+        console.log("run findGloabalVariableOfHeaderFile");
+        if (root_node.type !== 'translation_unit') {
+            console.log('Error: This node is NOT root of header file');
+            return [];
+        }
+
+        let temp_root = lodash.clone(root_node);
+        // /** Try to re-mark the tree */
+        // if (!(await checkPreorder(temp_root))) {
+        //     console.log("input root_node has null mark");
+        //     temp_root = await markNumPreorderTree(temp_root, temp_root.mark);
+        // }
+
+        let global_var_list = [];
+        for (const lv_1 of temp_root.children) {
+            if (lv_1.type == 'preproc_ifdef') {
+                for (const lv_2 of lv_1.children) {
+                    if (lv_2.type == 'declaration') {
+                        let global_var = await parseVariableDeclaration(lv_2)
+                        global_var_list.push(lodash.clone(global_var));
+                    }
+                }
+            }
+
         }
 
         return global_var_list;
