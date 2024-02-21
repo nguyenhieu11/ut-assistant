@@ -1,9 +1,10 @@
-const fs = require('fs');
+import fs from "fs";
 
-async function readTextBetweenTokens(filePath) {
+async function readTextBetweenTokens() {
     try {
-        const data = await fs.promises.readFile(filePath, 'utf8');
-        const regex = /undefined reference to `"(.*?)"'/g; // Modify the regular expression here
+        const data = "undefined reference to " + "`" + "abch" + "'"
+            + "more text ....." + "undefined reference to " + "`" + "hhhhh" + "'"
+        const regex = /undefined reference to `(.*?)'/g; // Corrected regular expression
         const results = [];
         let match;
 
@@ -17,4 +18,6 @@ async function readTextBetweenTokens(filePath) {
         throw error;
     }
 }
+
+// readTextBetweenTokens().then(results => console.log(results));
 
