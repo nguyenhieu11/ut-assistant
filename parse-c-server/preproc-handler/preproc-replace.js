@@ -1,5 +1,8 @@
 const code = `
 uint32_t getThreadId() {
+    #if  (FFFF) 
+        ffffff;
+    #endif
     #if(CCCCC)
         ccccc;
         func_line5();
@@ -86,7 +89,7 @@ export function parsePreprocessorDirectives(code) {
             preproc.content = line
             preproc.condition = "1"
         }
-        else if (line.startsWith('#if(')) {
+        else if (/^#if\s*\(/.test(line)) {
             preproc.type = "#if"
             preproc.line = i + 1
             preproc.content = line
