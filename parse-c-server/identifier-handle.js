@@ -121,4 +121,40 @@ export async function findGlobalVar(root_node) {
     }
 }
 
+export async function findAllIdentifier(root_noot) {
+    try {
+        console.log("run findAllIdentifier");
+
+        let temp_root = lodash.clone(root_noot);
+        /** Try to re-mark the tree */
+        // if (!(await checkPreorder(temp_root))) {
+        //     console.log("input root_noot has null mark");
+        //     temp_root = await markNumPreorderTree(temp_root, temp_root.mark);
+        // }
+
+        /** Find local var with recursive */
+        let identifier_list = []
+
+        async function findIdentifierRecursive(node) {
+            if (node.type == "identifier") {
+                let identifier = node.text
+                identifier_list.push(identifier)
+            }
+            if (node.children.length) {
+                for (let i = 0; i < node.children.length; i++) {
+                    await findIdentifierRecursive(node.children[i]);
+                }
+            }
+        }
+
+        await findIdentifierRecursive(temp_root);
+
+        return identifier_list;
+
+    } catch (error) {
+        throw error;
+    }
+}
+
+
 

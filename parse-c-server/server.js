@@ -51,6 +51,7 @@ import { findGloabalVariableOfHeaderFile, findGloabalVariableOfSourceFile } from
 import { findGlobalFuncDecl } from './function-definition/functionDefinition.js';
 import { findStubFunc } from './stub-function/stubFuncion.js';
 import { findPreprocDefOfFile } from './preproc-define/preprocDefine.js';
+import { decideCondition, test_function } from './preproc-handler/preproc-replace.js';
 
 // import {
 //     getTrustTable
@@ -277,6 +278,10 @@ app.get('/refactor', async (req, res) => {
     }
 });
 
+app.get('/test-func', async (req, res) => {
+    const data = await test_function();
+    res.send(data)
+});
 // app.get('/get-trust-table', (req, res) => {
 //     let trust_table = getTrustTable();
 
