@@ -1,18 +1,26 @@
 
 
+import lodash from 'lodash';
 
-export function getTestCaseList(if_list_info) {
+/** IDENTIFIER AS VALUE */
+const IDENTIFIER_AS_VALUE = [
+    "NULL_PTR"
+]
+
+export function getTestCaseList(if_list_info, preproc_list, enumerator_list) {
     let all_test_case = []
     if_list_info.forEach(ili => {
-        let ts_each_condition = parseTestCase(ili)
-        all_test_case.push(ts_each_condition);
+        let ts_each_condition = parseTestCase(ili, preproc_list, enumerator_list)
+        all_test_case.push(lodash.clone(ts_each_condition));
     });
     return all_test_case
 }
 
-function parseTestCase(condition_info) {
+function parseTestCase(condition_info, preproc_list, enumerator_list) {
     /**===== Begin pre-process ===== */
     let condition = condition_info
+
+
     /** delete .node */
     if (condition.info.node) {
         delete condition.info.node
@@ -29,7 +37,7 @@ function parseTestCase(condition_info) {
         ) {
             i_replace++;
             vbe.i_replace = i_replace;
-            replace_list.push(vbe);
+            replace_list.push(lodash.clone(vbe));
         }
     })
     condition.identifier_list.forEach(iden => {
@@ -52,7 +60,7 @@ function parseTestCase(condition_info) {
             if (!is_contained_in_condition) {
                 i_replace++;
                 iden.i_replace = i_replace;
-                replace_list.push(iden);
+                replace_list.push(lodash.clone(iden));
             }
         }
     })
@@ -60,11 +68,11 @@ function parseTestCase(condition_info) {
     condition.number_var = i_replace;
     condition.replace_list = replace_list
     /**===== End pre-process ===== */
-    let mcdc_table = getMcdcTable(condition);
+    let mcdc_table = getMcdcTable(condition, preproc_list, enumerator_list);
     return mcdc_table
 }
 
-function getAssignValue(identifier, operator, var_value, condition_value) {
+function getAssignValueWithNumber(identifier, operator, var_value, condition_value) {
     let assign = {}
 
     // console.log({ identifier, operator, var_value, condition_value })
@@ -120,7 +128,87 @@ function getAssignValue(identifier, operator, var_value, condition_value) {
     return assign;
 }
 
-function getAssignFromBinaryExpression(binary_expression_node, condition_value) {
+
+function getAssignValueWithIdentifier(right, operator, left, condition_value, preproc_list, enumerator_list) {
+    let assign = {}
+    let var_value;
+    // console.log({ identifier, operator, var_value, condition_value })
+
+
+
+    if (IDENTIFIER_AS_VALUE.includes(right)) {
+        assign.identifier = left;
+        var_value = right;
+    } else if (IDENTIFIER_AS_VALUE.includes(left)) {
+        assign.identifier = right;
+        var_value = left;
+    }
+    else {
+        console.log("Right and left are both identifiers")
+    }
+
+    switch (operator) {
+        case '>':
+            if (condition_value == 1) {
+                assign.value = parseInt(var_value) + 1;
+            }
+            else {
+
+                assign.value = parseInt(var_value);
+            }
+            break;
+        case '>=':
+            if (condition_value == 1) {
+                assign.value = parseInt(var_value);
+            }
+            else {
+                assign.value = parseInt(var_value) - 1;
+            }
+            break;
+        case '<':
+            if (condition_value == 1) {
+                assign.value = parseInt(var_value) - 1;
+            }
+            else {
+
+                assign.value = parseInt(var_value);
+            }
+            break;
+        case '<=':
+            if (condition_value == 1) {
+                assign.value = parseInt(var_value);
+            }
+            else {
+                assign.value = parseInt(var_value) + 1;
+            }
+            break;
+        case '==':
+            if (condition_value == 1) {
+                switch (var_value) {
+                    case "NULL_PTR":
+                        assign.value = 'NULL_PTR'
+                        break;
+                    default: break
+                }
+            }
+            else {
+                switch (var_value) {
+                    case "NULL_PTR":
+                        assign.value = 'NOT_NULL_PTR'
+                        break;
+                    default: break
+                }
+            }
+            break;
+
+        default:
+            break;
+    }
+    return assign;
+}
+
+
+function getAssignFromBinaryExpression(binary_expression_node, condition_value, preproc_list, enumerator_list) {
     const node = binary_expression_node;
     if (node.children.length == 3) {
         const left = node.children[0];
@@ -128,11 +216,16 @@ function getAssignFromBinaryExpression(binary_expression_node, condition_value) 
         const right = node.children[2];
         let assign_value = {}
         if (left.type == 'identifier' && right.type == 'number_literal') {
-            assign_value = getAssignValue(left.text, operator.text, right.text, condition_value);
+            assign_value = getAssignValueWithNumber(left.text, operator.text, right.text, condition_value);
         }
         else if (left.type == 'number_literal' && right.type == 'identifier') {
-            assign_value = getAssignValue(right.text, operator.text, left.text, condition_value);
+            assign_value = getAssignValueWithNumber(right.text, operator.text, left.text, condition_value);
         }
+        else if (left.type == 'identifier' && right.type == 'identifier') {
+            assign_value = getAssignValueWithIdentifier(right.text, operator.text, left.text, condition_value, preproc_list, enumerator_list);
+        }
+        assign_value.startPosition = node.startPosition;
+        assign_value.endPosition = node.endPosition;
         return assign_value
     }
     else {
@@ -142,8 +235,8 @@ function getAssignFromBinaryExpression(binary_expression_node, condition_value) 
     return {}
 }
 
-function getMcdcTable(condition) {
-    let { info, number_var, replace_list } = condition;
+function getMcdcTable(condition, preproc_list, enumerator_list) {
+    let { info, number_var, replace_list, startPosition, endPosition } = condition;
     const condition_text = info.condition
 
     let shorten_condition = condition_text;
@@ -220,7 +313,7 @@ function getMcdcTable(condition) {
         obj_key.forEach(obk => {
             if (obk.includes('var_')) {
                 let character = obk.replace('var_', '');
-                character_list.push(character);
+                character_list.push(lodash.clone(character));
             }
         })
         // test_case.character_list = character_list
@@ -234,7 +327,7 @@ function getMcdcTable(condition) {
                 }
             })
             rp_condition.value = tr[`var_${chr}`]
-            rp_condition_list.push(rp_condition)
+            rp_condition_list.push(lodash.clone(rp_condition))
         })
         // test_case.rp_condition_list = rp_condition_list
 
@@ -243,7 +336,7 @@ function getMcdcTable(condition) {
         rp_condition_list.forEach(cond => {
             let assign = {}
             if (Object.keys(cond).includes('binary_expression')) {
-                assign = getAssignFromBinaryExpression(cond.node, cond.value);
+                assign = getAssignFromBinaryExpression(cond.node, cond.value, preproc_list, enumerator_list);
                 assign.mark = cond.mark
             } else if (Object.keys(cond).includes('identifier')) {
                 assign.identifier = cond.identifier
@@ -254,11 +347,11 @@ function getMcdcTable(condition) {
             /** Get character and condition result for generate description step */
             assign.character = cond.character
             assign.conditon_value = cond.value
-            assign_list.push(assign)
+            assign_list.push(lodash.clone(assign))
         })
         test_case.assign_list = assign_list
         /** Push test case to array */
-        test_case_list.push(test_case)
+        test_case_list.push(lodash.clone(test_case))
 
         /** Generate test case description*/
         test_case_list.forEach(ts => {
@@ -272,6 +365,8 @@ function getMcdcTable(condition) {
             })
             ts.case_in_text = case_in_text
             ts.condition = condition_text
+            ts.startPosition = info.startPosition
+            ts.endPosition = info.endPosition
         })
 
     })

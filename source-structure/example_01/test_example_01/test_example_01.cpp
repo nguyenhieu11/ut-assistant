@@ -53,99 +53,95 @@ namespace Test
     //=================TEST_CASE=================//
 
     //=================BEGIN_AUTO_GEN_TC=================//
-    /** 
+    /**
      * Check coverage case (!( F )&& F ) = F of condition:
      *      (!(10 > g_var_1) && g_var_2)
-    */
-    TEST_F(ClassUnitTest, FUN_Test_TC1){
+     */
+    TEST_F(ClassUnitTest, FUN_Test_TC1)
+    {
 
         /* Test case declaration */
         Stub stubObj;
 
         /* Set value */
-		g_var_1 = 10;
-		g_var_2 = 0;
-        
+        g_var_1 = 10;
+        g_var_2 = 0;
+
         /* Call Stub function */
-		EXPECT_CALL(stubObj, Stub_func_1())
-			.willRepeatly(Return());
+        EXPECT_CALL(stubObj, Stub_func_1())
+            .willRepeatly(Return());
 
         /* Call SUT */
         FUN_Test();
         /* Test case check for variables */
-
     }
-        
-    /** 
+
+    /**
      * Check coverage case (!( F )&& T ) = T of condition:
      *      (!(10 > g_var_1) && g_var_2)
-    */
-    TEST_F(ClassUnitTest, FUN_Test_TC2){
+     */
+    TEST_F(ClassUnitTest, FUN_Test_TC2)
+    {
 
         /* Test case declaration */
         Stub stubObj;
 
         /* Set value */
-		g_var_1 = 10;
-		g_var_2 = 1;
-        
+        g_var_1 = 10;
+        g_var_2 = 1;
+
         /* Call Stub function */
-		EXPECT_CALL(stubObj, Stub_func_3())
-			.willRepeatly(Return());
-		EXPECT_CALL(stubObj, Stub_func_2())
-			.willRepeatly(Return());
+        EXPECT_CALL(stubObj, Stub_func_3())
+            .willRepeatly(Return());
+        EXPECT_CALL(stubObj, Stub_func_2())
+            .willRepeatly(Return());
 
         /* Call SUT */
         FUN_Test();
         /* Test case check for variables */
-
     }
-        
-    /** 
+
+    /**
      * Check coverage case (!( T )&& F ) = F of condition:
      *      (!(10 > g_var_1) && g_var_2)
-    */
-    TEST_F(ClassUnitTest, FUN_Test_TC3){
+     */
+    TEST_F(ClassUnitTest, FUN_Test_TC3)
+    {
 
         /* Test case declaration */
         Stub stubObj;
 
         /* Set value */
-		g_var_1 = 11;
-		g_var_2 = 0;
-        
+        g_var_1 = 11;
+        g_var_2 = 0;
+
         /* Call Stub function */
-		EXPECT_CALL(stubObj, Stub_func_1())
-			.willRepeatly(Return());
 
         /* Call SUT */
         FUN_Test();
         /* Test case check for variables */
-
     }
-        
-    /** 
+
+    /**
      * Check coverage case (!( T )&& T ) = F of condition:
      *      (!(10 > g_var_1) && g_var_2)
-    */
-    TEST_F(ClassUnitTest, FUN_Test_TC4){
+     */
+    TEST_F(ClassUnitTest, FUN_Test_TC4)
+    {
 
         /* Test case declaration */
         Stub stubObj;
 
         /* Set value */
-		g_var_1 = 11;
-		g_var_2 = 1;
-        
+        g_var_1 = 11;
+        g_var_2 = 1;
+
         /* Call Stub function */
-		EXPECT_CALL(stubObj, Stub_func_1())
-			.willRepeatly(Return());
 
         /* Call SUT */
         FUN_Test();
         /* Test case check for variables */
-
     }
-        //==================END_AUTO_GEN_TC==================//
+    //==================END_AUTO_GEN_TC==================//
 
 }
