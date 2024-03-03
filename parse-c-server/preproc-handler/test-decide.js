@@ -35,44 +35,33 @@ function createPreprocArray(code) {
 
 const preproc_arr = createPreprocArray(code);
 // console.log(preproc_arr);
-
 function processPreprocArray(preprocArr) {
-    let ifdefStack = [];
-    let ifStack = [];
+    let directiveStack = [];
 
     preprocArr.forEach((dr, index) => {
         switch (dr.type) {
             case '#ifdef':
             case '#if':
                 dr.is_open = dr.value === '1';
-                if (dr.type === '#ifdef') {
-                    ifdefStack.push({ is_open: dr.is_open, index });
-                } else {
-                    ifStack.push({ is_open: dr.is_open, index });
-                }
+                directiveStack.push({ is_open: dr.is_open, index });
                 break;
             case '#else':
-                if (ifdefStack.length > 0 && ifdefStack[ifdefStack.length - 1].index < index) {
-                    dr.is_open = !ifdefStack[ifdefStack.length - 1].is_open;
-                    ifdefStack[ifdefStack.length - 1].is_open = dr.is_open;
-                } else if (ifStack.length > 0 && ifStack[ifStack.length - 1].index < index) {
-                    dr.is_open = !ifStack[ifStack.length - 1].is_open;
-                    ifStack[ifStack.length - 1].is_open = dr.is_open;
+                if (directiveStack.length > 0) {
+                    dr.is_open = !directiveStack[directiveStack.length - 1].is_open;
+                    directiveStack[directiveStack.length - 1].is_open = dr.is_open;
                 }
                 break;
             case '#elif':
-                if (ifStack.length > 0) {
-                    dr.is_open = !ifStack[ifStack.length - 1].is_open && dr.value === '1';
+                if (directiveStack.length > 0) {
+                    dr.is_open = !directiveStack[directiveStack.length - 1].is_open && dr.value === '1';
                     if (dr.is_open) {
-                        ifStack[ifStack.length - 1].is_open = true;
+                        directiveStack[directiveStack.length - 1].is_open = true;
                     }
                 }
                 break;
             case '#endif':
-                if (ifdefStack.length > 0 && ifdefStack[ifdefStack.length - 1].index < index) {
-                    ifdefStack.pop();
-                } else if (ifStack.length > 0 && ifStack[ifStack.length - 1].index < index) {
-                    ifStack.pop();
+                if (directiveStack.length > 0) {
+                    directiveStack.pop();
                 }
                 break;
         }
@@ -80,6 +69,7 @@ function processPreprocArray(preprocArr) {
 
     return preprocArr;
 }
+
 
 const processedPreprocArr = processPreprocArray(preproc_arr);
 console.log(processedPreprocArr);
