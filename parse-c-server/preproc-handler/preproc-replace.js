@@ -245,14 +245,13 @@ export async function test_function() {
 }
 
 
-const replacePreproc = async (str, replace_with) => {
-    const spaceSurrounded = /\s+xxx\s+/g;
-    const parenSurrounded = /\(\s*xxx\s*\)/g;
-    const specialCharSurrounded = /(?<=\s|\(|\&|\||\!|=)xxx(?=\s|\)|\&|\||\!|=)/g;
+const replacePreproc = async (str, target, replace_with) => {
+    const spaceSurrounded = new RegExp(`\\s+${target}\\s+`, 'g');
+    const parenSurrounded = new RegExp(`\\(\\s*${target}\\s*\\)`, 'g');
+    const specialCharSurrounded = new RegExp(`(?<=\\s|\\(|\\&|\\||\\!)${target}(?=\\s|\\)|\\&|\\||\\!|=)`, 'g');
 
-    // let str = ' xxx , (xxx), &xxx| !xxx =xxx xxx= ';
     str = str.replace(spaceSurrounded, replace_with)
         .replace(parenSurrounded, replace_with)
         .replace(specialCharSurrounded, replace_with);
-    console.log(str); // Outputs: ' yyy , (yyy), &yyy| !yyy =yyy yyy= '
+    console.log(str);
 };
