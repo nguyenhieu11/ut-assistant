@@ -255,3 +255,16 @@ const replacePreproc = async (str, target, replace_with) => {
         .replace(specialCharSurrounded, replace_with);
     console.log(str);
 };
+
+function removeUnusedBlocks(code, unusedArr) {
+    let lines = code.split('\n');
+    unusedArr.forEach(block => {
+        for (let i = block.startLine; i <= block.endLine; i++) {
+            if (lines[i - 1] !== undefined) {
+                lines[i - 1] = '';
+            }
+        }
+    });
+    return lines.join('\n');
+}
+
